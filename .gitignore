@@ -1,0 +1,6 @@
+.idea
+venv
+.env
+uploaded
+__pycache__
+/EvolutionServer.code-workspace
