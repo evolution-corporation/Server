@@ -75,15 +75,16 @@ def getMeditation(language, request_uid=None, meditation_id=None):
             result['recommend'] = Meditation.getByParams(countDay=params['countDay'], timeMeditation=params['time'], typesMeditation=list(
                 map(lambda typeMeditation: TypeMeditation[typeMeditation], params['type'])), user=user, language=language)
         if request.args.get('getIsNotListened', 'False').lower() == 'true' and request.args.get('params', None) == None and not user is None:
-            result['isNotListened'] = Meditation.getIsNotListenedUser(
+            result['recommend'] = Meditation.getIsNotListenedUser(
                 user=user, language=language)
 
         if request.args.get(
                 'popularToDay', 'False').lower() == 'true':
-            result['popular'] = Meditation.getPopular()
+            result['popularToDay'] = Meditation.getPopular()
         for meditations in result.items():
-            result[meditations[0]] = meditations[1].serialization(
-                isMinimal=True, language=language)
+            if meditations[1] is not None:
+                result[meditations[0]] = meditations[1].serialization(
+                    isMinimal=True, language=language)
 
         return createJSONAnswer(user_id=request_uid, result=result)
 
@@ -92,10 +93,15 @@ def getMeditation(language, request_uid=None, meditation_id=None):
 @authorizationRequestWithFireBaseAuthorization(stronger=False)
 @getLanguageRequest
 def playMeditation(language, meditation_id=None, request_uid=None):
-    if meditation_id == None:
-        raise NotMeditationId()
-    meditation = Meditation.getById(meditation_id)
-    if request_uid != None:
-        user = User.getById(request_uid)
-        meditation.play(user)
-    return send_file(f'{os.getcwd()}/uploaded/audio/{language.value}/{meditation.audioId}.mp3')
+    try:
+        if meditation_id == None:
+            raise NotMeditationId()
+        meditation = Meditation.get_by_id(meditation_id)
+        if request_uid != None:
+            user = User.getById(request_uid)
+            meditation.play(user)
+        return send_file(f'{os.getcwd()}/uploaded/audio/{language.name.lower()}/{meditation.audioId}.mp3')
+    except NotMeditationId:
+        return createJSONReject(user_id=request_uid, code=404)
+    except DoesNotExist:
+        return createJSONReject(user_id=request_uid, code=404)

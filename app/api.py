@@ -225,9 +225,9 @@ def plants(request_uid, plant_id=None):
 def authentication(request_uid):
     try:
         user = User.get_by_id(request_uid)
-        return createJSONAnswer(user_id=request_uid, result={'user_data': user.serialization(), 'statusAuthentication': StatusAuthentication.AUTHORIZED.value})
+        return createJSONAnswer(user_id=request_uid, result={'user_data': user.serialization(), 'statusAuthentication': StatusAuthentication.AUTHORIZED.name})
     except DoesNotExist:
-        return createJSONAnswer(user_id=request_uid, result={'user_data': None, 'statusAuthentication': StatusAuthentication.AUTHORIZED.value})
+        return createJSONAnswer(user_id=request_uid, result={'user_data': None, 'statusAuthentication': StatusAuthentication.AUTHORIZED.name})
     # except:
     #   return createJSONReject(message=str(UnknownError()))
 

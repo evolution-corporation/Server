@@ -57,11 +57,14 @@ class Meditation(BaseModal):
 
     def serialization(self, isMinimal: bool = False, language: Language = Language.RU):
         return {
+            'id': self.id,
             'name': Translate.get_by_id(self.name).getTranslate(language),
             'description': Translate.get_by_id(
                 self.description).getTranslate(language),
             'image': self.imageId,
-            'lengthAudio': self.lengthAudio.get().length
+            'lengthAudio': self.lengthAudio.get().length,
+            'audio': self.audioId,
+            'type': self.typeMeditation.name
         }
 
     def play(self, user: User):
@@ -71,7 +74,7 @@ class Meditation(BaseModal):
     def create(cls, name: dict, description: dict, image: FileStorage, typeMeditation: str, audio: dict):
         typeMeditation = TypeMeditation[typeMeditation]
         nameId = Translate.uploadTranslate(name)
-        descriptionI = Translate.uploadTranslate(description)
+        descriptionId = Translate.uploadTranslate(description)
         imageId = uploadImg(image, 'meditation')
         audioId = None
         for language in audio:
@@ -79,7 +82,7 @@ class Meditation(BaseModal):
                                   language, audio_id=audioId)
 
         meditation = super().create(name=nameId,
-                                    description=descriptionI,
+                                    description=descriptionId,
                                     typeMeditation=typeMeditation,
                                     imageId=imageId,
                                     audioId=audioId)
@@ -113,15 +116,22 @@ class Meditation(BaseModal):
                 return None
 
     @classmethod
-    def getByParams(cls, countDay: int, timeMeditation: int, typesMeditation: list[TypeMeditation], user: User, language: Language = Language.RU):
+    def getByParams(cls, countDay: str, timeMeditation: str, typesMeditation: list[TypeMeditation], user: User, language: Language = Language.RU):
         historyWeek = UserListenMeditation.getListingLastWeek(user=user)
-        if len(historyWeek) <= countDay:
+        haveIsFreeDay = 7
+        if countDay == "2-3days":
+            haveIsFreeDay = 3
+        if countDay == "4-5days":
+            haveIsFreeDay = 5
+        if countDay == "6-7days":
+            haveIsFreeDay = 7
+        if len(historyWeek) <= haveIsFreeDay:
             duration = (MeditationAudioLength.length <= 18 * 60)
-            if timeMeditation > 15 and timeMeditation < 60:
+            if timeMeditation == "moreThan15AndLessThan60Minutes":
                 duration = ((MeditationAudioLength.length <= 15 * 60)
                             & (MeditationAudioLength.length >= 60 * 60))
-            elif timeMeditation >= 60:
-                duration = (MeditationAudioLength.length >= 60 * 60)
+            elif timeMeditation == "moreThan60Minutes":
+                duration = (MeditationAudioLength.length >= 55 * 60)
             if timeMeditation < 60 and typesMeditation.count(TypeMeditation.DMD) == 1:
                 typesMeditation.remove(TypeMeditation.DMD)
             return cls.__getMeditationFromList(Meditation.select().where(Meditation.typeMeditation.in_(
@@ -160,11 +170,13 @@ class UserListenMeditation(BaseModal):
 
     @classmethod
     def create(cls, user: User, meditation: Meditation):
-        lastUserListingMeditation = cls.get(
+        lastUserListingMeditation = cls.get_or_none(
             UserListenMeditation.user == user, UserListenMeditation.meditation == meditation)
-        delta = datetime.now() - lastUserListingMeditation.dateTimeListen
-        if delta.total_seconds() > 12 * 3600:
-            super().create(user=user, meditation=meditation)
+        if lastUserListingMeditation is not None:
+            delta = datetime.now() - lastUserListingMeditation.dateTimeListen
+            if delta.total_seconds() <= 12 * 3600:
+                return
+        super().create(user=user, meditation=meditation)
 
     @classmethod
     def getPopularToDay(cls) -> Union[Meditation, None]:
@@ -173,14 +185,15 @@ class UserListenMeditation(BaseModal):
             UserListenMeditation.dateTimeListen >= toDay)
         mustPopular = None
         countListen = {}
-        if len(toDayList):
+        if toDayList.count() > 0:
             for listenInfo in toDayList:
-                countListen[listenInfo.meditation] += 1
+                countListen[listenInfo.meditation] = countListen.get(
+                    listenInfo.meditation, 0) + 1
                 if mustPopular == None:
                     mustPopular = listenInfo.meditation
-                else:
+                elif mustPopular != listenInfo.meditation:
                     mustPopular = listenInfo if countListen[listenInfo] > countListen[mustPopular] else mustPopular
-            return Meditation.get_by_id(mustPopular)
+            return mustPopular
         else:
             return None
 

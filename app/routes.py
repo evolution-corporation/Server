@@ -30,7 +30,8 @@ def downloadApplication(app_name):
     if app_name == 'plants':
         return redirect('https://expo.dev/accounts/nikitabs/projects/plants/builds/de1547a6-bdc5-4caf-b57e-47bc046a60ff')
     if app_name == 'ecstasys':
-        return redirect('https://expo.dev/accounts/nikitabs/projects/ecstasys/builds/baf79de2-886b-4d05-895b-bc2d1292e0cf')
+        return send_file(f'{os.getcwd()}/static/app-debug.apk')
+        return redirect('https://expo.dev/accounts/nikitabs/projects/ecstasys/builds/8eb142fa-2f7d-42c7-b26d-acf38c3a8ab8')
     return '', 404
 
 

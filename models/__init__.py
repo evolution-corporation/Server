@@ -10,8 +10,7 @@ from .Translates import Translate
 from .BaseModal import BaseModal
 
 
-async def create_tables():
-    # createCustomType()
+def create_tables():
     tables = [User, Product, Order, Plant, Meditation,
               Translate, UserListenMeditation, MeditationAudioLength]
     with psql_db:
