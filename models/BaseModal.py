@@ -20,18 +20,18 @@ class EnumField(Field):
         return self.enum[value]
 
 
-class GeoJSONField(Field):
-    field_type = 'geography(POINT, 4326)'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def db_value(self, value):
-        return f'SRID=4326;POINT({value["longitude"]} {value["latitude"]})'
-
-    def python_value(self, value):
-        coordinate = wkb.loads(value, hex=True).xy
-        return {"longitude": coordinate[0][0], "latitude": coordinate[1][0]}
+# class GeoJSONField(Field):
+#     field_type = 'geography(POINT, 4326)'
+#
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#
+#     def db_value(self, value):
+#         return f'SRID=4326;POINT({value["longitude"]} {value["latitude"]})'
+#
+#     def python_value(self, value):
+#         coordinate = wkb.loads(value, hex=True).xy
+#         return {"longitude": coordinate[0][0], "latitude": coordinate[1][0]}
 
 
 class EnumField_(IntegerField):

@@ -15,7 +15,6 @@ def authorizationWithFireBase(function):
         try:
             if not request.headers.get('authorization'):
                 return {'message': 'No token provider'}, 401
-            # 'OJqASpMNp1aVc7WiqeZdXEOVftP2'
             user = auth.verify_id_token(request.headers['authorization'])
             return function(request_uid=user, *args, **kwargs)
         except auth.InvalidIdTokenError:
@@ -33,9 +32,7 @@ def authorizationRequestWithFireBaseAuthorization(stronger=False, *args_decorato
                 if stronger and token is None:
                     return {'message': 'No token provider'}, 401
                 if request.headers.get('authorization'):
-                    # auth.verify_id_token(request.headers['authorization'])
-                    user = 'OJqASpMNp1aVc7WiqeZdXEOVftP2'
-
+                    user = auth.verify_id_token(request.headers['authorization'])
                 return function(request_uid=user, *args, **kwargs)
             except auth.InvalidIdTokenError:
                 if stronger:
