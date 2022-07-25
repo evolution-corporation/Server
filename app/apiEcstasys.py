@@ -5,16 +5,13 @@ import json
 from flask import request, send_file
 
 from app import app as rest_api
-from models.User import User, UserRole, StatusAuthentication, onlyAdministrator
-from models.Order import Order, OrderStatus
-from models.Product import Product
-from models.Errors import *
+from models.User import User, onlyAdministrator
+
 from models.Meditation import Meditation, TypeMeditation
 from models.Translates import Language, getLanguageRequest
 
 from utils.Errors import *
-from utils.filesTools import uploadAudio
-from utils.fireBase import authorizationWithFireBase, authorizationRequestWithFireBaseAuthorization
+from utils.fireBase import authorizationRequestWithFireBaseAuthorization
 from utils.response import *
 
 
@@ -65,7 +62,7 @@ def getMeditation(language, request_uid=None, meditation_id=None):
         return createJSONAnswer(user_id=request_uid, result=meditation.serialization(
             isMinimal=isMinimalInformation, language=language))
     else:
-        user = User.getById(request_uid)
+        user = User.get_by_id(request_uid)
         result: dict[str, Meditation] = {}
         arg = request.args
         if request.args.get('params', None) != None and not user is None:
@@ -98,7 +95,7 @@ def playMeditation(language, meditation_id=None, request_uid=None):
             raise NotMeditationId()
         meditation = Meditation.get_by_id(meditation_id)
         if request_uid != None:
-            user = User.getById(request_uid)
+            user = User.get_by_id(request_uid)
             meditation.play(user)
         return send_file(f'{os.getcwd()}/uploaded/audio/{language.name.lower()}/{meditation.audioId}.mp3')
     except NotMeditationId:

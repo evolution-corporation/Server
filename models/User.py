@@ -1,37 +1,43 @@
+import json
 import os
 import random
-from datetime import date, datetime
 import enum
-from functools import wraps
+import re
+from datetime import datetime, date
+from typing import  TypeVar, Optional
 
-from .BaseModal import *
+from functools import wraps
+from peewee import ModelSelect, CharField, DateField, UUIDField, DateTimeField, DoesNotExist
+from werkzeug.datastructures import FileStorage
+
+from custom_enum import CustomEnum, auto_enum
+from Error import UserDoesNotExist, UserDoesExist, ValueNotCorrect
+from custom_validator import validate_nickname, validate_birthday
+from .BaseModal import BaseModal, EnumField
 from .Errors import *
 from utils.filesTools import uploadImg
-from utils.fireBase import editUserDataFB
 
 
-class UserRole(enum.Enum):
-    NO_REGISTRATION = 0
-    USER = 1
-    ADMIN = 2
+class UserRole(CustomEnum):
+    USER = auto_enum()
+    ADMIN = auto_enum()
 
 
-class UserCategory(enum.Enum):
-    NULL = None
-    BLOGGER = 1
-    COMMUNITY = 2
-    ORGANIZATION = 3
-    EDITOR = 4
-    WRITER = 5
-    GARDENER = 6
-    FLOWER_MAN = 7
-    PHOTOGRAPHER = 8
+class UserCategory(CustomEnum):
+    BLOGGER = auto_enum()
+    COMMUNITY = auto_enum()
+    ORGANIZATION = auto_enum()
+    EDITOR = auto_enum()
+    WRITER = auto_enum()
+    GARDENER = auto_enum()
+    FLOWER_MAN = auto_enum()
+    PHOTOGRAPHER = auto_enum()
 
 
-class UserGender(enum.Enum):
-    MALE = 0
-    FEMALE = 1
-    OTHER = 2
+class UserGender(CustomEnum):
+    MALE = auto_enum()
+    FEMALE = auto_enum()
+    OTHER = auto_enum()
 
 
 class StatusAuthentication(enum.Enum):
@@ -40,113 +46,196 @@ class StatusAuthentication(enum.Enum):
     AUTHORIZED = 2
 
 
+Self = TypeVar("Self", bound="User")
+
+
+class UserList:
+    """
+    Список с моделями пользователей
+    """
+
+    def __init__(self, users: tuple[Self]):
+        self.__list = users
+        self.__index = 0
+
+    def to_serialization(self) -> list[dict]:
+        """
+        Сериализация списка пользователей
+        """
+        users_list: list[dict] = []
+        for user in self.__list:
+            users_list.append(user.serialization)
+        return users_list
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.__index == len(self.__list) - 1:
+            raise StopIteration
+        self.__index = self.__index + 1
+        return self.__data[self.__index]
+
+
 class User(BaseModal):
-    uid = CharField(column_name='UID', primary_key=True)
-    nickName = CharField(max_length=16, column_name='NickName', index=True)
+    id = CharField(column_name='id', primary_key=True)
+    nickname = CharField(max_length=16, column_name='NickName', index=True)
     birthday = DateField(column_name='Birthday', null=True)
     imageId = UUIDField(column_name='ImageId', null=True)
-    displayName = CharField(
+    name = CharField(
         max_length=32, column_name='DisplayName', null=True)
     status = CharField(max_length=128, column_name='Status', null=True)
-    role = EnumField_(enum=UserRole, column_name='Role',
-                      default=UserRole.NO_REGISTRATION)
-    gender = EnumField_(enum=UserGender, column_name='Gender',
-                        default=UserGender.OTHER)
-    category = EnumField_(enum=UserCategory, column_name='Category', null=True)
+    role = EnumField(enum=UserRole, name_enum='UserRole', column_name='Role', default=UserRole.USER)
+    gender = EnumField(enum=UserGender, name_enum='UserGender', column_name='Gender', default=UserGender.OTHER)
+    category = EnumField(enum=UserCategory, name_enum='UserCategory', column_name='Category', null=True)
     registration = DateTimeField(
         column_name='DateTimeRegistration', default=datetime.now())
 
-    def updateData(self, **kwargs):
-        if kwargs.get('image', False):
-            self.imageId = uploadImg(
-                kwargs['image'], sub_directory_name='user', old_name_file=self.imageId)
-        if kwargs.get('display_name', False):
-            self.displayName = kwargs['display_name']
-        if kwargs.get('image', False) or kwargs.get('display_name', False):
-            editUserDataFB(self.uid, self.imageId, self.displayName)
-        if kwargs.get('nickname', False):
-            if kwargs['nickname'] != self.nickName:
-                if not User.checkUniqueNickname(kwargs['nickname']):
-                    raise NicknameNoUnique(kwargs['nickname'])
-                self.nickName = kwargs['nickname']
-        if kwargs.get('birthday', False):
-            self.birthday = date.fromisoformat(kwargs['birthday'])
-        if kwargs.get('status', False) or kwargs['status'] is None:
-            self.status = None if kwargs['status'] == '' else kwargs['status']
-        if kwargs.get('gender', False):
-            self.gender = UserGender(kwargs['gender'])
-        if kwargs.get('category', False):
-            self.category = UserCategory(kwargs['category'])
+    def full_update(self, nickname: Optional[str] = None, birthday: Optional[date] = None, status: Optional[str] = None,
+                    gender: Optional[UserGender] = None, category: Optional[UserCategory] = None,
+                    name: Optional[str] = None, image: Optional[FileStorage] = None, role: Optional[UserRole] = None):
+        """
+        Обновляет все данные об пользователе. Имеет минимальную проверку.
+        Если какие-то данные не являются валидными, то они не будут обновлены.
+        :param nickname: Уникальное имя пользователя.
+        :param birthday: Дата рождения пользователя.
+        :param status: Отображаемое сообщение пользователем.
+        :param gender: Пол выбранный пользователем.
+        :param category: Категория профиля выбранная пользователем.
+        :param name: Имя отображаемое пользователем.
+        :param image: Изображения профиля пользователя.
+        :param role: Роль пользователя в системе
+        """
+        if nickname is not None and User.checkUniqueNickname(nickname):
+            self.nickname = nickname
+        if birthday is not None and birthday < date.today():
+            self.birthday = birthday
+        if image is not None:
+            self.imageId = uploadImg(image, sub_directory_name='user', old_name_file=self.imageId)
+        if status is not None:
+            self.status = status
+        if gender is not None:
+            self.gender = gender
+        if category is not None:
+            self.category = category
+        if name is not None:
+            self.name = name
+        if role is not None:
+            self.role = role
         self.save()
 
-    def editRole(self, role: UserRole, admin):
-        if admin.role == UserRole.ADMIN:
-            self.role = role
+    @validate_nickname
+    def update_nickname(self, nickname: str):
+        """
+        Обновляет уникальное имя пользователя.
+        :param nickname: Новый уникальное имя пользователя.
+        """
+        if not (0 < len(nickname) < 16 and re.sub(r'^[a-z\d\._]*$', nickname, '') == ''):
+            raise ValueNotCorrect('nickname', {'isNull': False, 'min_len': 1, 'max_len': 16,
+                                               'allowed_characters': '"a-z", "0-9",".", "_"'})
+        if User.check_unique_nickname(nickname):
+            self.nickname = nickname
             self.save()
+        else:
+            raise UserDoesNotExist(nickname=nickname)
 
-    def serialization(self, is_minimum_data=False):
-        user_data = {
-            'uid': self.uid,
-            'nickName': self.nickName,
-            'role': self.role.name,
-            'image': self.imageId,
-            'displayName': self.displayName
-        }
-        if not is_minimum_data:
-            user_data['status'] = self.status
-            user_data['category'] = self.category.name if self.category else None
-            user_data['gender'] = self.gender.name
-            user_data['birthday'] = self.birthday.isoformat()
-        return user_data
+    def update_image(self, image: FileStorage):
+        """
+        Обновляет изображение пользователя.
+        :param image: Новое изображение пользователя.
+        """
+        self.imageId = uploadImg(image, sub_directory_name='user', old_name_file=self.imageId)
+        self.save()
 
-    def isAdmin(self) -> bool:
+    def update_status(self, status: str):
+        """
+        Обновляет отображаемое на странице пользователя сообщение.
+        :param status: Новое сообщение пользователя.
+        """
+        self.status = status
+        self.save()
+
+    def update_gender(self, gender: UserGender):
+        """
+        Обновляет отображаемый пол пользователя.
+        :param gender: Новый пол пользователя.
+        """
+        self.gender = gender
+        self.save()
+
+    def update_category(self, category: UserCategory):
+        """
+        Обновляет отображаемую категория профиля.
+        :param category: Новая категория профиля.
+        """
+        self.category = category
+        self.save()
+
+    def update_name(self, name: str):
+        """
+        Обновляет имя пользователя.
+        :param name: Новое имя пользователя.
+        """
+        self.name = name
+        self.save()
+
+    @property
+    def is_admin(self) -> bool:
         return self.role == UserRole.ADMIN
 
-    @classmethod
-    def createAccount(cls, uid: str, **kwargs):
-        try:
-            cls.get_by_id(uid)
-            raise TheUserExists(uid)
-        except DoesNotExist:
-            params = {}
-            if not kwargs.get('nickname', False):
-                raise NicknameNoUnique()
-            params['nickName'] = kwargs['nickname']
-            if not cls.checkUniqueNickname(params['nickName']):
-                raise NicknameNoUnique(params['nickName'])
-            if kwargs.get('birthday', False):
-                if kwargs['birthday'].find('T') != -1:
-                    kwargs['birthday'] = kwargs['birthday'][:kwargs['birthday'].find(
-                        'T')]
-                params['birthday'] = date.fromisoformat(kwargs['birthday'])
-                params['role'] = UserRole.USER
-            if kwargs.get('status', False):
-                params['status'] = kwargs['status']
-            if kwargs.get('gender', False):
-                params['gender'] = UserGender(kwargs['gender'])
-            if kwargs.get('category', False):
-                params['category'] = UserCategory(kwargs['category'])
-            if kwargs.get('image', False):
-                params['imageId'] = uploadImg(
-                    kwargs['image'], sub_directory_name='user')
-            if kwargs.get('displayName', False):
-                params['displayName'] = kwargs['displayName']
-            user = cls.create(uid=uid, **params)
-            user.save()
-            return user
+    def __str__(self):
+        return self.id
 
     @classmethod
-    def checkUniqueNickname(cls, nickname):
+    @validate_nickname
+    @validate_birthday
+    def create(cls, uid: str, nickname: str, birthday: date, status: Optional[str] = None,
+               gender: Optional[UserGender] = None, category: Optional[UserCategory] = None,
+               name: Optional[str] = None, image: Optional[FileStorage] = None) -> Self:
+        """
+        Добавляет данные об пользователе в систему. Если не найден id и nickname.
+        :param uid: id пользователя.
+        :param nickname: Уникальное имя пользователя.
+        :param birthday: Дата рождения пользователя.
+        :param status: Отображаемое сообщение пользователем.
+        :param gender: Пол выбранный пользователем.
+        :param category: Категория профиля выбранная пользователем.
+        :param name: Имя отображаемое пользователем.
+        :param image: Изображения профиля пользователя.
+        """
+
+        if User.get_or_none(User.id == uid) is not None:
+            raise UserDoesExist(uid)
+        if User.get_or_none(User.nickname == nickname) is not None:
+            raise UserDoesExist(nickname=nickname)
+        user = User(id=uid, nickname=nickname, birthday=birthday, gender=gender, category=category, status=status,
+                    name=name)
+        user.save()
+        if image is not None:
+            user.imageId = uploadImg(image, sub_directory_name='user')
+        user.save()
+        return user
+
+    @classmethod
+    @validate_nickname
+    def check_unique_nickname(cls, nickname: str) -> bool:
+        """
+        Проверяет, является ли уникальным nickname.
+        :param nickname: проверяемы никнейм.
+        """
         try:
-            if nickname == 'nikita123a':
-                return False
             result = User.get(User.nickName == nickname)
             return not result
         except DoesNotExist:
             return True
 
     @classmethod
-    def generateUniqueNickname(cls, nickname=''):
+    @validate_nickname
+    def generate_unique_nickname(cls, nickname='') -> list[str]:
+        """
+        Генерирует варианты уникальных nickname`ов на основе предоставленного.
+        :param nickname: базовый nickname.
+        """
         list_generate_nickname = []
         bad_words = []
         random_part_words = []
@@ -161,18 +250,24 @@ class User(BaseModal):
         while len(list_generate_nickname) < 5:
             random_part = random.choice(random_part_words)
             random_nickname = f'{nickname}_{random_part}'
-            if cls.checkUniqueNickname(random_nickname):
+            if User.check_unique_nickname(random_nickname):
                 list_generate_nickname.append(f'{nickname}_{random_part}')
             random_part_words.remove(random_part)
         return list_generate_nickname
 
     @classmethod
-    def searchByNicknameOrDisplayName(cls, nickname, strong=False, limit=20):
+    def search_by_nickname(cls, nickname, strong=False, limit=20) -> UserList:
+        """
+        Поиск пользователей по nickname.
+        :param nickname: Вариант nickname искомого пользователя.
+        :param strong: Если True, то будет использоваться строгое совпадение.
+        :param limit: Кол-во возвращаемы пользователей.
+        """
         users = []
         if strong:
             users = User.select() \
                 .where(User.nickName.startswith(nickname)).limit(limit).order_by(User.nickName)
-            return users
+            return
         else:
             users_search_part = {}
             number_of_users_found = 0
@@ -208,23 +303,74 @@ class User(BaseModal):
             return users[:limit]
 
     @classmethod
-    def getById(cls, uid):
+    def get_one(cls, uid=None, nickname=None) -> Self:
+        """
+        Получить пользователя по uid, nickname.
+        Необходимо передать uid или nickname
+        :param uid: id пользователя в системе.
+        :param nickname: nickname пользователя в системе.
+        """
+        user: ModelSelect[User] = User.select()
+        if uid is None and nickname is None:
+            raise TypeError('It is necessary to pass the uid or nickname')
         try:
-            return User.get_by_id(uid)
+            if uid is not None:
+                user = user.where(User.id == uid)
+            if nickname is not None:
+                user = user.where(User.nickname == nickname)
+            return user.get()
         except DoesNotExist:
-            return None
+            if uid is not None:
+                raise UserDoesNotExist(uid)
+            elif nickname is not None:
+                raise UserDoesNotExist(nickname)
+
+    @classmethod
+    def get_list(cls, page: int = 1, birthday: date | None = None,
+                 role: tuple[UserRole] = UserRole.items,
+                 gender: tuple[UserGender] = UserGender.items,
+                 category: tuple[UserCategory | None] = UserCategory.items + (None,)) -> UserList:
+        """
+        Получить список пользователей. Отсортированных по nickname.
+        Фильтры (birthday, role, gender, category), если ни один из параметров не указан,
+        то возвращаются все пользователи.
+        :param page: Номер страницы с записями(на одной странице 20 записей). 0 - вернуть все записи.
+        :param birthday: Дата больше или равна дате рождения пользователей, которых необходимо вернуть.
+        :param role: Список ролей пользователей в системе, которые будут возвращены.
+        :param gender: Список полов пользователей в системе, которые будут возвращены.
+        :param category: Список категорий пользователей в системе, которые будут возвращены.
+        """
+        users: ModelSelect[User] = User.select().order_by(User.nickname) \
+            .where((User.role << role) & (User.gender << gender))
+        if birthday is not None:
+            users = users.where((birthday >= User.birthday))
+        if None in category:
+            index_category_none = category.index(None)
+            users = users.where((User.category << category[:index_category_none] + category[index_category_none + 1:]) |
+                                User.category.is_null())
+        else:
+            users = users.where(User.category << category)
+        if page != 0:
+            users = users.paginate(page, 20)
+        return UserList(tuple(user for user in users))
+
+    @staticmethod
+    def __dir__() -> list[str]:
+        return ['id', 'nickname', 'role', 'name', 'status', 'category', 'gender', 'birthday']
 
     class Meta:
         table_name = 'user'
 
 
-def onlyAdministrator(function):
+def only_administrator(function):
     @wraps(function)
     def wrapped(request_uid, *args, **kwargs):
-        try:
-            if User.get_by_id(request_uid).isAdmin():
-                return function(request_uid=request_uid, *args, **kwargs)
-            return {'message': 'Not enough rights to perform actions'}, 403
-        except DoesNotExist:
-            return {'message': 'No user to verify rights found'}, 401
+        """
+        Проверяет, является ли пользователь, который отправил запрос администратором.
+        :params request_uid: id пользователя
+        """
+        if not User.get_one(request_uid).is_admin:
+            raise AccessDenied()
+        return function(request_uid=request_uid, *args, **kwargs)
+
     return wrapped

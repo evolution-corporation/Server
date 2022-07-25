@@ -1,89 +1,46 @@
-import os
 from datetime import datetime
 from flask import request
 from peewee import DoesNotExist
 
-from app import app as rest_api
+from app import app as rest_api, api_answer
 from utils.fireBase import authorizationWithFireBase, authorizationRequestWithFireBaseAuthorization
 from utils.Errors import *
 from models.User import User, UserRole, StatusAuthentication
-from models.Order import Order, OrderStatus
-from models.Product import Product
-from models.Plant import Plant, PlantStatus
 from models.Errors import *
 
 
-def createJSONAnswer(user_id=None, code=200, **kwargs):
-    return {'uid': user_id, 'timeReturn': datetime.now().isoformat(), **kwargs}, code
-
-
-def createJSONReject(message: str, code=500, **kwargs):
-    return createJSONAnswer(status='Error', message=message, code=code, **kwargs)
-
-
-@rest_api.route('/api/users', methods=['POST'])
-@rest_api.route('/api/users/<user_id>', methods=['DELETE', 'PUT'])
-@authorizationWithFireBase
-def users(request_uid, user_id=None):
-    if user_id is None:
-        user_id = request_uid
-    try:
-        if request_uid != user_id:
-            user = User.get_by_id(request_uid)
-            if user.role != UserRole.ADMIN:
-                raise AccessDenied()
-        if request.method == 'POST':
-            request_data = request.get_json()
-            user = User.createAccount(uid=user_id, **request_data)
-            return createJSONAnswer(user_id=request_uid, status='AccountCreate',
-                                    result=user.serialization(is_minimum_data=False))
-        elif request.method == 'PUT':
-            user = User.get_by_id(user_id)
-            if request.files.get('image', False):
-                user.updateData(image=request.files['image'])
-                return createJSONAnswer(user_id=request_uid, status='User image suspect update',
-                                        result=user.serialization())
-            else:
-                request_data = request.get_json()
-                user.updateData(**request_data)
-                print(type(user.serialization()['status']))
-                return createJSONAnswer(user_id=request_uid, status='User data suspect update',
-                                        result=user.serialization())
-    except DoesNotExist:
-        return createJSONReject(message=str(TheUserNoExists(uid=user_id)), user_id=request_uid)
-    except FileTypeError:
-        return createJSONReject(message=str(FileTypeError(desired_type=FileType.IMG)), user_id=request_uid)
-    except NicknameNoUnique:
-        return createJSONReject(user_id=request_uid, message=str(NicknameNoUnique()))
-    except TheUserExists:
-        return createJSONReject(message=str(TheUserExists(uid=user_id)), user_id=request_uid)
-    except AccessDenied:
-        return createJSONReject(message=str(AccessDenied()), code=403)
-    # except:
-    #     return createJSONReject(user_id=request_uid, message=str(UnknownError()))
-
-@rest_api.route('/api/users', methods=['GET'])
-@rest_api.route('/api/users/<user_id>', methods=['GET'])
-def getUser(user_id=None):
-    try:
-        is_minimum_data = True if request.args.get(
-            'is_minimum_data', 'false').lower() == 'true' else False
+@rest_api.route('/api/users', methods=['GET', 'POST', 'PATCH'])
+@rest_api.route('/api/users/<user_id>', methods=['GET', 'DELETE', 'PUT'])
+@api_answer
+def getUser(request_uid, user_id=None):
+    if request.method == 'GET':
         if user_id is not None:
-            user = User.get_by_id(user_id)
-            user_data = user.serialization(is_minimum_data=is_minimum_data)
-            return createJSONAnswer(result=user_data)
+            return {'user': User.get_one(uid=user_id).dict}
         else:
-            users_ = []
-            users_ = User.select()
-            users = []
-            for user in users_:
-                users.append(user.serialization(
-                    is_minimum_data=is_minimum_data))
-            return createJSONAnswer(result=users)
-    except DoesNotExist:
-        return createJSONReject(message=str(TheUserNoExists(uid=user_id)))
-    except:
-        return createJSONReject(user_id=user_id, message=str(UnknownError()))
+            return {'users': User.get_list().to_serialization()}
+    elif request.method == 'POST':
+        request_data = request.get_json()
+        user = User.createAccount(uid=request_uid, **request_data)
+        return {'status': 'AccountCreate'}, user.serialization(is_minimum_data=False)
+    elif request.method == 'PUT':
+        pass
+    if request_uid != user_id:
+        user = User.get_by_id(request_uid)
+        if user.role != UserRole.ADMIN:
+            raise AccessDenied()
+    elif request.method == 'PUT':
+        user = User.get_by_id(user_id)
+        if request.files.get('image', False):
+            user.updateData(image=request.files['image'])
+            return createJSONAnswer(user_id=request_uid, status='User image suspect update',
+                                    result=user.serialization())
+        else:
+            request_data = request.get_json()
+            user.updateData(**request_data)
+            print(type(user.serialization()['status']))
+            return createJSONAnswer(user_id=request_uid, status='User data suspect update',
+                                    result=user.serialization())
+
 
 
 # @rest_api.route('/api/orders', methods=['POST', 'PUT', 'DELETE'])

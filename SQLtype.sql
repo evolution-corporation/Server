@@ -191,3 +191,19 @@ CREATE TYPE TypeMeditation as ENUM(
     'dancePsychotechnics',
     'DMD'
 );
+
+CREATE TYPE UserRole as ENUM('USER', 'ADMIN');
+
+CREATE TYPE UserCategory as ENUM('BLOGGER',
+'COMMUNITY',
+'ORGANIZATION',
+'EDITOR',
+'WRITER',
+'GARDENER',
+'FLOWER_MAN',
+'PHOTOGRAPHER');
+
+CREATE TYPE UserGender as ENUM('MALE',
+'FEMALE',
+'OTHER');
+
