@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace WebApi.Controllers;
+﻿namespace Server.Controllers;
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;

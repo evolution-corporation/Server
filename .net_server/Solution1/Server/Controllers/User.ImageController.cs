@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApi.Services;
+using Server.Services;
 
-namespace WebApi.Controllers;
+namespace Server.Controllers;
 
 [ApiController]
 [Route("/user.image")]

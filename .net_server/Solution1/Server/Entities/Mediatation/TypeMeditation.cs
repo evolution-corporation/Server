@@ -1,4 +1,4 @@
-﻿namespace WebApi.Entities;
+﻿namespace Server.Entities;
 
 public enum TypeMeditation
 {

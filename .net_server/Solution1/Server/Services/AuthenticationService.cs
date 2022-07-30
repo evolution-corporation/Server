@@ -1,12 +1,8 @@
-﻿using System.Runtime.ExceptionServices;
-using System.Security.Claims;
-using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using Microsoft.AspNetCore.Authentication;
-using WebApi.Entities;
-using WebApi.Helpers;
+﻿using FirebaseAdmin.Auth;
+using Server.Entities;
+using Server.Helpers;
 
-namespace WebApi.Services;
+namespace Server.Services;
 
 public interface IAuthenticationService
 {
@@ -15,11 +11,8 @@ public interface IAuthenticationService
 
 public class AuthenticationService: IAuthenticationService
 {
-    private DataContext context;
-    public AuthenticationService(DataContext context)
-    {
-        this.context = context;
-    }
+    private readonly DataContext context;
+    public AuthenticationService(DataContext context) => this.context = context;
 
     public User GetUserByToken(string token)
     {

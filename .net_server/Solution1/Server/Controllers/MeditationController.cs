@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApi.Models.Meditation;
-using WebApi.Services;
+using Server.Models.Meditation;
+using Server.Services;
 
-namespace WebApi.Controllers;
+namespace Server.Controllers;
 
+[ApiController]
+[Route("/meditation")]
 public class MeditationController : ControllerBase
 {
     private IMeditationService service;

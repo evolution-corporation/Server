@@ -1,18 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApi.Services;
+using Server.Services;
 
-namespace WebApi.Controllers;
+namespace Server.Controllers;
 
 [ApiController]
 [Route("nickname")]
 public class NicknameController: ControllerBase
 {
-    private NicknameService _service;
+    private INicknameService _service;
 
-    public NicknameController(NicknameService service)
-    {
-        _service = service;
-    }
+    public NicknameController(INicknameService service) => _service = service;
 
     [HttpGet]
     public IActionResult GetUserByNickname(string nickname, bool is_minimum_data, bool is_strong)

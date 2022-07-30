@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using FirebaseAdmin.Auth;
-using WebApi.Entities;
-using WebApi.Helpers;
-using WebApi.Models.Meditation;
+using Server.Entities;
+using Server.Helpers;
+using Server.Models.Meditation;
 
-namespace WebApi.Services;
+namespace Server.Services;
 
 public interface IMeditationService
 {
@@ -22,10 +22,13 @@ public class MeditationService: IMeditationService
 {
     private readonly DataContext context;
     private readonly IMapper mapper;
-    public MeditationService(DataContext context, IMapper mapper)
+    private readonly Resources resources;
+    
+    public MeditationService(DataContext context, IMapper mapper, Resources resources)
     {
         this.context = context;
         this.mapper = mapper;
+        this.resources = resources;
     }
 
     public Meditation GetById(int id)
@@ -55,6 +58,8 @@ public class MeditationService: IMeditationService
     {
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         var meditation = mapper.Map<Meditation>(model);
+        var base64 = Convert.FromBase64String(model.Audio);
+        File.WriteAllBytes(resources.Audio + meditation.id,base64);
         context.Meditations.Add(meditation);
         context.SaveChangesAsync();
     }
@@ -64,6 +69,12 @@ public class MeditationService: IMeditationService
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         var meditation = context.Meditations.First(x => x.id == id);
         mapper.Map(model, meditation);
+        if (!string.IsNullOrEmpty(model.Audio))
+        {
+            var base64 = Convert.FromBase64String(model.Audio);
+            File.Delete(resources.Audio + id);
+            File.WriteAllBytes(resources.Audio + id, base64);
+        }
         context.Meditations.Update(meditation);
         context.SaveChangesAsync();
     }

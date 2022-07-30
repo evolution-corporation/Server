@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using WebApi.Entities;
+using Server.Entities;
 
-namespace WebApi.Models.Meditation;
+namespace Server.Models.Meditation;
 
 public class CreateMeditationRequest
 {

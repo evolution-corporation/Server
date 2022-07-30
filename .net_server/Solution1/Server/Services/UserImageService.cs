@@ -1,23 +1,30 @@
 ﻿using AutoMapper;
-using WebApi.Helpers;
+using Server.Helpers;
 
-namespace WebApi.Services;
+namespace Server.Services;
 
 public interface IUserImageService
 {
-    public Guid GetUserImage(Guid id);
+    public string GetUserImage(Guid id);
 }
 
 public class UserImageService: IUserImageService
 {
-    private DataContext _context;
-    private readonly IMapper _mapper;
+    private DataContext context;
+    private readonly IMapper mapper;
+    private readonly Resources resources;
     
-    public UserImageService(DataContext context, IMapper mapper)
+    public UserImageService(DataContext context, IMapper mapper, Resources resources)
     {
-        _context = context;
-        _mapper = mapper;
+        this.context = context;
+        this.mapper = mapper;
+        this.resources = resources;
     }
 
-    public Guid GetUserImage(Guid id) => _context.Users.First(x => x.Id == id).ImageId;
+    public string GetUserImage(Guid id)
+    {
+        var file = File.ReadAllBytes(resources.Images + id);
+        var base64 = Convert.ToBase64String(file);
+        return base64;
+    }
 }

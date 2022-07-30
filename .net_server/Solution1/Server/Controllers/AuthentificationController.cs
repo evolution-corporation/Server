@@ -1,12 +1,9 @@
-﻿using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using Microsoft.AspNetCore.Mvc;
-using WebApi.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using Server.Services;
 
-namespace WebApi.Controllers;
+namespace Server.Controllers;
 
 [ApiController]
-
 [Route("/authentication")]
 public class AuthenticationController: ControllerBase
 {

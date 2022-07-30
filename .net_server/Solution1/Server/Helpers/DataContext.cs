@@ -1,11 +1,17 @@
-namespace WebApi.Helpers;
+using Server.Entities;
+
+namespace Server.Helpers;
 
 using Microsoft.EntityFrameworkCore;
-using WebApi.Entities;
+using Entities;
 
 public class DataContext : DbContext
 {
     protected readonly IConfiguration Configuration;
+    public DbSet<User> Users { get; set; }
+    public DbSet<Meditation> Meditations { get; set; }
+    public DbSet<Subscribe> Subscribes { get; set; }
+    public DbSet<Dmd> DMDs { get; set; }
 
     public DataContext(IConfiguration configuration)
     {
@@ -18,6 +24,5 @@ public class DataContext : DbContext
         options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
     }
 
-    public DbSet<User> Users { get; set; }
-    public DbSet<Meditation> Meditations { get; set; }
+    
 }

@@ -1,6 +1,6 @@
-﻿using WebApi.Entities;
+﻿using Server.Entities;
 
-namespace WebApi.Models.Meditation;
+namespace Server.Models.Meditation;
 
 public class UpdateMeditationRequest
 {

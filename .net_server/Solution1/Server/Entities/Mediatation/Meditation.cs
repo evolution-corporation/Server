@@ -1,14 +1,16 @@
-﻿namespace WebApi.Entities;
+﻿namespace Server.Entities;
 
 public class Meditation
 {
-    public int id { get; set; }
+    private static int IdCount;
+
+    static Meditation() => IdCount = 1;
+    public int id { get; set; } = IdCount++;
     public string Language { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string Image { get; set; }
     public TypeMeditation TypeMeditation { get; set; }
-    public string Audio { get; set; }
     public bool IsSubscribed { get; set; }
     public int ListenedToday { get; set; }
 }

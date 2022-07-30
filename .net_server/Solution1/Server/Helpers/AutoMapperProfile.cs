@@ -1,10 +1,10 @@
-using WebApi.Models.Meditation;
+using Server.Models.Meditation;
 
-namespace WebApi.Helpers;
+namespace Server.Helpers;
 
 using AutoMapper;
-using WebApi.Entities;
-using WebApi.Models.Users;
+using Entities;
+using Models.Users;
 
 public class AutoMapperProfile : Profile
 {

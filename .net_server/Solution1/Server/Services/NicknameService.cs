@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using WebApi.Entities;
-using WebApi.Helpers;
+using Server.Entities;
+using Server.Helpers;
 
-namespace WebApi.Services;
+namespace Server.Services;
 
 public interface INicknameService
 {
@@ -11,17 +11,17 @@ public interface INicknameService
 
 public class NicknameService: INicknameService
 {
-    private DataContext _context;
-    private readonly IMapper _mapper;
+    private readonly DataContext context;
+    private readonly IMapper mapper;
     
     public NicknameService(DataContext context, IMapper mapper)
     {
-        _context = context;
-        _mapper = mapper;
+        this.context = context;
+        this.mapper = mapper;
     }
 
     public User GetUserByNickname(string nickname)
     {
-        return _context.Users.First(x => x.NickName.Equals(nickname));
+        return context.Users.First(x => x.NickName.Equals(nickname));
     }
 }
