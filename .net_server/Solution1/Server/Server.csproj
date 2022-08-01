@@ -24,4 +24,8 @@
       <Folder Include="Resources\Images" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Expo\Expo.csproj" />
+    </ItemGroup>
+
 </Project>

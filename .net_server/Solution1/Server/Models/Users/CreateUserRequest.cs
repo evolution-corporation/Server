@@ -19,4 +19,6 @@ public class CreateUserRequest
     public string Image { get; set; }
 
     public string DisplayName { get; set; }
+    
+    public string ExpoToken { get; set; }
 }
