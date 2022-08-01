@@ -27,9 +27,9 @@ public class DmdController: ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostDmd(IEnumerable<Guid> ids, string name)
+    public IActionResult PostDmd(Guid[] ids, string name)
     {
-        service.PostDmd(ids,name);
+        service.PostDmd(ids.ToList(),name);
         return Ok();
     }
 }

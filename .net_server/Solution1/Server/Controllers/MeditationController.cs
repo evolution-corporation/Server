@@ -31,14 +31,14 @@ public class MeditationController : ControllerBase
 
     }
 
-    [HttpPost("token")]
+    [HttpPost("{token}")]
     public IActionResult AddMeditation(CreateMeditationRequest model, string token)
     {
         service.Create(model, token);
         return Ok(new { message = "Meditation created" });
     }
 
-    [HttpPatch("token")]
+    [HttpPatch("{token}")]
     public IActionResult UpdateMeditation(int id, UpdateMeditationRequest model, string token)
     {
         service.Update(model, id, token);

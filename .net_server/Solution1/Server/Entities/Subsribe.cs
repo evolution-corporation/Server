@@ -8,4 +8,5 @@ public class Subscribe
     public Guid UserId { get; set; }
     public DateTime WhenSubscribe { get; set; }
     public DateTime TimeSubscribe { get; set; }
+    
 }

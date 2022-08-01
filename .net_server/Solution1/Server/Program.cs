@@ -29,6 +29,8 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IAuthenticationService, AuthenticationService>();
     services.AddScoped<IMeditationService, MeditationService>();
     services.AddScoped<ISubscribeService, SubscribeService>();
+    services.AddScoped<IPaymentService, PaymentService>();
+    services.AddScoped<Resources>();
     FirebaseApp.Create(new AppOptions
     {
         Credential =
@@ -37,10 +39,8 @@ var builder = WebApplication.CreateBuilder(args);
     });
 }
 
-
-
-
 var app = builder.Build();
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 {
     // global cors policy
     app.UseCors(x => x

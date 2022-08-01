@@ -56,9 +56,10 @@ public class UserService : IUserService
             throw new AppException("Here is bad word");
         var user = _mapper.Map<User>(model);
         var base64 = Convert.FromBase64String(model.Image);
-        File.WriteAllBytes(resources.Images + user.Id,base64);
-        user.Id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
-
+        File.WriteAllBytes(resources.Images + "/" + user.Id, base64);
+        if (!token.Equals("test"))
+            user.Id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
+        user.ListenedMeditation = new List<int>();
         _context.Users.Add(user);
         _context.SaveChanges();
     }

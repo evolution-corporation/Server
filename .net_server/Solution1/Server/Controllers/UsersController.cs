@@ -6,7 +6,7 @@ using Models.Users;
 using Services;
 
 [ApiController]
-[Route("/users")]
+[Route("/Users")]
 public class UsersController : ControllerBase
 {
     private IUserService _userService;
@@ -21,7 +21,13 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetByIdWithShort(bool min = false, string id = "")
+    public IActionResult GetAllUser()
+    {
+        return Ok(_userService.GetAll());
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetByIdWithShort(string id = "", bool min = false)
     {
         if (id.Equals(string.Empty))
             return Ok(_userService.GetAll());
@@ -50,5 +56,4 @@ public class UsersController : ControllerBase
         _userService.UpdateByUser(token, model);
         return Ok(new { message = "User updated" });
     }
-    
 }

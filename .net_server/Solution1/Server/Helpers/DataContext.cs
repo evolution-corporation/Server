@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Caching.Memory;
 using Server.Entities;
+using Server.Entities.Payment;
 
 namespace Server.Helpers;
 
@@ -12,6 +14,7 @@ public class DataContext : DbContext
     public DbSet<Meditation> Meditations { get; set; }
     public DbSet<Subscribe> Subscribes { get; set; }
     public DbSet<Dmd> DMDs { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     public DataContext(IConfiguration configuration)
     {
@@ -21,8 +24,7 @@ public class DataContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         // in memory database used for simplicity, change to a real db for production applications
-        options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
+        options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
+        //options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
     }
-
-    
 }
