@@ -18,6 +18,6 @@ public class AuthenticationService: IAuthenticationService
     {
         var decodedToken = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result;
         var uid = new Guid(decodedToken.Uid);
-        return context.Users.First(x => x.Id == uid);
+        return context.Users.AsQueryable().First(x => x.Id == uid);
     }
 }

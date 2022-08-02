@@ -8,22 +8,24 @@ namespace Server.Services;
 
 public interface IMeditationService
 {
-    public Meditation GetById(int id);
-    public IEnumerable<Meditation> GetAllMeditation();
-    public IEnumerable<Meditation> GetNotListened(string? token);
-    public Meditation GetPopular();
+    public Meditation GetById(int id, string token);
+    public IEnumerable<Meditation> GetAllMeditation(string language);
+    public IEnumerable<Meditation> GetNotListened(string token, string language);
+    public Meditation GetPopular(string language);
 
     public void Create(CreateMeditationRequest model, string token);
 
     public void Update(UpdateMeditationRequest model, int id, string token);
+
+    public IEnumerable<Meditation> GetMeditationByPreferences(MeditationPreferences preferences);
 }
 
-public class MeditationService: IMeditationService
+public class MeditationService : IMeditationService
 {
     private readonly DataContext context;
     private readonly IMapper mapper;
     private readonly Resources resources;
-    
+
     public MeditationService(DataContext context, IMapper mapper, Resources resources)
     {
         this.context = context;
@@ -31,50 +33,84 @@ public class MeditationService: IMeditationService
         this.resources = resources;
     }
 
-    public Meditation GetById(int id)
+    //TODO: Добавить проверку на подписку
+    public Meditation GetById(int id, string token)
     {
-        return context.Meditations.First(x => x.id == id);
+        var userId = context.GetUserId(token);
+        var meditation = context.Meditations.AsQueryable().First(x => x.id == id);
+        var sub = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == userId);
+        if (meditation.IsSubscribed && sub == null)
+            throw new ArgumentException("User did not have subscription");
+        return meditation;
     }
 
-    public IEnumerable<Meditation> GetAllMeditation()
+    public IEnumerable<Meditation> GetMeditationByPreferences(MeditationPreferences preferences)
     {
-        return context.Meditations;
+        return context.Meditations.AsQueryable().Where(x =>
+                x.CountDay == preferences.CountDay &&
+                x.Time == preferences.Time &&
+                preferences.TypeMeditation.Contains(x.TypeMeditation))
+            .ToArray();
     }
 
-    public IEnumerable<Meditation> GetNotListened(string? token)
+    public IEnumerable<Meditation> GetAllMeditation(string language)
     {
+        return context.Meditations.AsQueryable().Where(x => x.Language == language).ToArray();
+    }
+
+    public IEnumerable<Meditation> GetNotListened(string token, string language)
+    {
+        var queryUser = context.Users.AsQueryable();
+        var queryMeditation = context.Meditations.AsQueryable();
         var id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
-        var user = context.Users.First(x => x.Id == id);
-        return context.Meditations.Where(x => !user.ListenedMeditation.Contains(x.id));
+        var user = queryUser.First(x => x.Id == id);
+        return queryMeditation
+            .Where(x =>  x.Language == language &&
+                !user.ListenedMeditation.Contains(x.id))
+            .ToArray();
     }
 
-    public Meditation GetPopular()
+    public Meditation GetPopular(string language)
     {
-        var max = context.Meditations.Max(x => x.ListenedToday);
-        return context.Meditations.First(x => x.ListenedToday == max);
+        var query = context.Meditations.AsQueryable();
+        var max = query
+            .Where(x => x.Language == language)
+            .Max(x => x.ListenedToday);
+        return query.First(x => x.ListenedToday == max);
     }
 
     public void Create(CreateMeditationRequest model, string token)
     {
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         var meditation = mapper.Map<Meditation>(model);
-        var base64 = Convert.FromBase64String(model.Audio);
-        File.WriteAllBytes(resources.Audio + meditation.id,base64);
+        var audio = Convert.FromBase64String(model.Audio);
+        var image = Convert.FromBase64String(model.Image);
+        File.WriteAllBytes(resources.MeditationAudio + "/" + meditation.id + ".k", audio);
+        File.WriteAllBytes(resources.MeditationImages + "/" + meditation.id + ".k", image);
         context.Meditations.Add(meditation);
         context.SaveChangesAsync();
     }
 
-    public void Update(UpdateMeditationRequest model,int id, string token)
+    public void Update(UpdateMeditationRequest model, int id, string token)
     {
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        var meditation = context.Meditations.First(x => x.id == id);
+        var query = context.Meditations.AsQueryable();
+        var meditation = query.First(x => x.id == id);
         mapper.Map(model, meditation);
         if (!string.IsNullOrEmpty(model.Audio))
         {
             var base64 = Convert.FromBase64String(model.Audio);
-            File.Delete(resources.Audio + id);
-            File.WriteAllBytes(resources.Audio + id, base64);
+            File.Delete(resources.MeditationAudio + "/" + id + ".k");
+            File.WriteAllBytes(resources.MeditationAudio + "/" + id + ".k", base64);
         }
+
+        if (!string.IsNullOrEmpty(model.Audio))
+        {
+            var base64 = Convert.FromBase64String(model.Image);
+            File.Delete(resources.MeditationImages + "/" + id + ".k");
+            File.WriteAllBytes(resources.MeditationImages + "/" + id + ".k", base64);
+        }
+
         context.Meditations.Update(meditation);
         context.SaveChangesAsync();
     }

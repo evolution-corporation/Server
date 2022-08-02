@@ -2,6 +2,7 @@
 
 public class Resources
 {
-    public string Images { get; set; }
-    public string Audio { get; set; }
+    public string MeditationImages { get; set; }
+    public string MeditationAudio { get; set; }
+    public string UserImage { get; set; }
 }

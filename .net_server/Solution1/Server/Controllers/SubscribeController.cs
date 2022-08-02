@@ -18,9 +18,16 @@ public class SubscribeController: ControllerBase
     }
 
     [HttpPost]
-    public IActionResult SubscribeUser(Guid userId, DateTime subTime)
+    public IActionResult SubscribeUser(string token, int subTime)
     {
-        service.SubscribeUser(userId, subTime);
+        service.SubscribeUser(token, subTime);
+        return Ok();
+    }
+
+    [HttpDelete]
+    public IActionResult UnsubscribeUser(string token)
+    {
+        service.UnsubscribeUser(token);
         return Ok();
     }
 }

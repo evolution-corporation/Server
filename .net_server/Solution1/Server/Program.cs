@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Server.Entities;
 using Server.Helpers;
 using Server.Services;
 
@@ -30,6 +31,9 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IMeditationService, MeditationService>();
     services.AddScoped<ISubscribeService, SubscribeService>();
     services.AddScoped<IPaymentService, PaymentService>();
+    services.AddScoped<IDmdService, DmdService>();
+    services.AddScoped<IMeditationAudioService, MeditationAudioService>();
+    services.AddScoped<IMeditationImageService, MeditationImageService>();
     services.AddScoped<Resources>();
     FirebaseApp.Create(new AppOptions
     {

@@ -13,9 +13,8 @@ public interface IUserService
     User GetById(Guid id);
     void Create(CreateUserRequest model, string token);
     void Update(Guid id, UpdateUserRequest model);
-
     void UpdateByUser(string token, UpdateUserRequest model);
-    // void Delete(int id);
+    public void UserListened(string token, int meditationId);
 }
 
 public class UserService : IUserService
@@ -56,7 +55,7 @@ public class UserService : IUserService
             throw new AppException("Here is bad word");
         var user = _mapper.Map<User>(model);
         var base64 = Convert.FromBase64String(model.Image);
-        File.WriteAllBytes(resources.Images + "/" + user.Id, base64);
+        File.WriteAllBytes(resources.UserImage + "/" + user.Id, base64);
         if (!token.Equals("test"))
             user.Id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
         user.ListenedMeditation = new List<int>();
@@ -76,8 +75,9 @@ public class UserService : IUserService
 
     public void UpdateByUser(string token, UpdateUserRequest model)
     {
+        var query = _context.Users.AsQueryable();
         var uid = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
-        var user = _context.Users.FirstOrDefault(x => x.Id == uid);
+        var user = query.First(x => x.Id == uid);
         if (user == null)
             throw new AppException("User with token" + token + "not found");
         if (_context.Users.Any(x => x.NickName == model.NickName))
@@ -88,9 +88,21 @@ public class UserService : IUserService
         _context.SaveChanges();
     }
 
+    public void UserListened(string token, int meditationId)
+    {
+        var userId = _context.GetUserId(token);
+        var user = _context.Users.AsQueryable().First(x => x.Id == userId);
+        var listenedBefore = user.ListenedMeditation.Count;
+        if (!user.ListenedMeditation.AsQueryable().Contains(meditationId)) user.ListenedMeditation.Add(meditationId);
+        if (user.ListenedMeditation.Count != listenedBefore)
+            _context.Meditations.Find(meditationId)!.ListenedToday.Add(userId);
+        _context.SaveChanges();
+    }
+
     private User getUser(Guid id)
     {
-        var user = _context.Users.FirstOrDefault(x => x.Id == id);
+        var query = _context.Users.AsQueryable();
+        var user = query.FirstOrDefault(x => x.Id == id);
         if (user == null) throw new KeyNotFoundException("User not found");
         return user;
     }
@@ -100,6 +112,6 @@ public class UserService : IUserService
         var list = new List<string>();
         var rnd = new Random();
         for (var i = 0; i < 5; i++) list.Add(nickname + rnd.Next());
-        return list;
+        return list.ToArray();
     }
 }

@@ -4,9 +4,9 @@ using Npgsql.Internal.TypeHandlers;
 
 namespace Server.Entities;
 
+//TODO: Обновление listenedToday каждый день на пустой set
 public class User
 {
-    
     public Guid Id { get; set; }
     public string NickName { get; set; }
     public string Birthday { get; set; }
@@ -16,7 +16,6 @@ public class User
     public UserGender Gender { get; set; }
     public UserCategory Category { get; set; }
     public DateTime DateTimeRegistration { get; set; } = DateTime.Now;
-    public bool IsSubscribed { get; set; }
     public List<int> ListenedMeditation { get; set; } = new();
     public string ExpoToken { get; set; }
 }

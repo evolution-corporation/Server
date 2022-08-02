@@ -39,7 +39,6 @@ public class UsersController : ControllerBase
     public IActionResult Create(CreateUserRequest model, string token)
     {
         _userService.Create(model, token);
-        Console.Write("Have request");
         return Ok(new { message = "User created" });
     }
 
@@ -49,6 +48,14 @@ public class UsersController : ControllerBase
         _userService.Update(new Guid(id), model);
         return Ok(new { message = "User updated" });
     }
+
+    [HttpPut("{token}")]
+    public IActionResult AddMeditation(string token, int meditationId)
+    {
+        _userService.UserListened(token,meditationId);
+        return Ok();
+    }
+
 
     [HttpPatch("{token}")]
     public IActionResult UpdateByUser(string token, UpdateUserRequest model)

@@ -1,13 +1,16 @@
-﻿using Server.Entities;
+﻿using System.Security.Authentication;
+using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Server.Entities;
 using Server.Helpers;
 
 namespace Server.Services;
 
 public interface ISubscribeService
 {
-   public void SubscribeUser(Guid userId, DateTime timeSubscribe);
+   public void SubscribeUser(string token, int timeSubscribe);
 
-   public void UnsubscribeUser(Guid userId);
+   public void UnsubscribeUser(string token);
 }
 
 public class SubscribeService: ISubscribeService
@@ -19,21 +22,28 @@ public class SubscribeService: ISubscribeService
       this.context = context;
    }
 
-   public void SubscribeUser(Guid userId, DateTime timeSubscribe)
+   public void SubscribeUser(string token, int timeSubscribe)
    {
+      var userId = context.GetUserId(token);
+      if (context.Payments.FirstOrDefault(x => x.UserId == userId) == null)
+         throw new AuthenticationException("Subscription not paid");
+
+      var oldSub = context.Subscribes.First(x => x.UserId == userId);
       var sub = new Subscribe
       {
          UserId = userId,
          WhenSubscribe = DateTime.Now,
-         TimeSubscribe = timeSubscribe
+         TimeSubscribe = timeSubscribe + oldSub.TimeSubscribe
       };
-      context.Users.First(x => x.Id == userId).IsSubscribed = true;
+      context.Subscribes.Remove(oldSub);
       context.Subscribes.Add(sub);
+      context.SaveChanges();
    }
 
-   public void UnsubscribeUser(Guid userId)
+   public void UnsubscribeUser(string token)
    {
-      context.Subscribes.Remove(context.Subscribes.First(x => x.UserId == userId));
-      context.Users.First(x => x.Id == userId).IsSubscribed = false;
+      var userId = context.GetUserId(token);
+      context.Subscribes.Remove(context.Subscribes.AsQueryable().First(x => x.UserId == userId));
+      context.SaveChanges();
    }
 }

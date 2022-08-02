@@ -8,7 +8,7 @@ namespace Server.Controllers;
 [Route("/meditation")]
 public class MeditationController : ControllerBase
 {
-    private IMeditationService service;
+    private readonly IMeditationService service;
 
     public MeditationController(IMeditationService service)
     {
@@ -17,18 +17,20 @@ public class MeditationController : ControllerBase
 
     [HttpGet("{token} {language}")]
     public IActionResult GetMeditation(string language,
+        MeditationPreferences? preferences,
         bool getIsNotListened = false,
         bool popularToday = false,
-        bool isMinimumData = false,
         int meditationId = 0,
         string? token = null)
     {
         if (meditationId != 0)
-            return Ok(service.GetById(meditationId));
-        if (!getIsNotListened) return popularToday ? Ok(service.GetPopular()) : Ok(service.GetAllMeditation());
+            return Ok(service.GetById(meditationId, token));
+        if (preferences != null)
+            return Ok(service.GetMeditationByPreferences(preferences));
+        if (!getIsNotListened)
+            return popularToday ? Ok(service.GetPopular(language)) : Ok(service.GetAllMeditation(language));
         if (token is null) throw new UnauthorizedAccessException();
-        return Ok(service.GetNotListened(token));
-
+        return Ok(service.GetNotListened(token, language));
     }
 
     [HttpPost("{token}")]

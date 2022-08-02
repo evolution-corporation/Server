@@ -1,5 +1,6 @@
 ﻿namespace Server.Entities;
 
+//TODO: Обнуление счётчика прослушиваний
 public class Meditation
 {
     private static int IdCount;
@@ -9,8 +10,9 @@ public class Meditation
     public string Language { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public string Image { get; set; }
     public TypeMeditation TypeMeditation { get; set; }
+    public CountDayMeditation CountDay { get; set; }
+    public TimeMeditation Time { get; set; }
     public bool IsSubscribed { get; set; }
-    public int ListenedToday { get; set; }
+    public List<Guid> ListenedToday { get; set; }
 }

@@ -22,6 +22,6 @@ public class NicknameService: INicknameService
 
     public User GetUserByNickname(string nickname)
     {
-        return context.Users.First(x => x.NickName.Equals(nickname));
+        return context.Users.AsQueryable().First(x => x.NickName.Equals(nickname));
     }
 }

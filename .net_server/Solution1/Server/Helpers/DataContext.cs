@@ -1,3 +1,4 @@
+using FirebaseAdmin.Auth;
 using Microsoft.Extensions.Caching.Memory;
 using Server.Entities;
 using Server.Entities.Payment;
@@ -24,7 +25,10 @@ public class DataContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         // in memory database used for simplicity, change to a real db for production applications
-        options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
-        //options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
+        //options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
+        options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
     }
+    
+    public Guid GetUserId(string token) => new(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
+    
 }

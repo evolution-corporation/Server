@@ -5,8 +5,8 @@ namespace Server.Services;
 
 public interface IDmdService
 {
-    public Dmd GetDmd(Guid id);
-    public void PostDmd(List<Guid> id,string name);
+    public Dmd GetDmd(int id);
+    public void PostDmd(List<int> id,string name);
 
     public IEnumerable<Dmd> GetAllDmd();
 }
@@ -19,22 +19,23 @@ public class DmdService: IDmdService
         this.context = context;
     }
 
-    public Dmd GetDmd(Guid id)
+    public Dmd GetDmd(int id)
     {
-        return context.DMDs.First(x => x.Id == id);
+        return context.DMDs.AsQueryable().First(x => x.Id == id);
     }
 
-    public void PostDmd(List<Guid> ids, string name)
+    public void PostDmd(List<int> ids, string name)
     {
         context.DMDs.Add(new Dmd
         {
             Name = name,
             MeditationsId = ids
         });
+        context.SaveChanges();
     }
 
     public IEnumerable<Dmd> GetAllDmd()
     {
-        return context.DMDs;
+        return context.DMDs.AsQueryable().ToArray();
     }
 }

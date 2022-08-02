@@ -21,13 +21,13 @@ public class DmdController: ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetDMD(Guid id)
+    public IActionResult GetDMD(int id)
     {
         return Ok(service.GetDmd(id));
     }
 
     [HttpPost]
-    public IActionResult PostDmd(Guid[] ids, string name)
+    public IActionResult PostDmd(int[] ids, string name)
     {
         service.PostDmd(ids.ToList(),name);
         return Ok();
