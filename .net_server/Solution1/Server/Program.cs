@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Server.Controllers;
 using Server.Entities;
 using Server.Helpers;
 using Server.Services;
@@ -35,6 +36,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IMeditationAudioService, MeditationAudioService>();
     services.AddScoped<IMeditationImageService, MeditationImageService>();
     services.AddScoped<Resources>();
+    services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {
         Credential =
@@ -56,6 +58,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     app.UseMiddleware<ErrorHandlerMiddleware>();
 
     app.MapControllers();
+    app.MapHub<AsyncEnumerableHub>("/meditation.audio");
 }
 
 
