@@ -1,6 +1,0 @@
-﻿namespace Server.Entities;
-
-public enum UserCategory
-{
-    NULL, BLOGGER, COMMUNITY, ORGANIZATION, EDITOR, WRITER, GARDENER, FLOWER_MAN, PHOTOGRAPHER
-}
