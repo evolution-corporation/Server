@@ -33,7 +33,6 @@ public class MeditationService : IMeditationService
         this.resources = resources;
     }
 
-    //TODO: Добавить проверку на подписку
     public Meditation GetById(int id, string token)
     {
         var userId = context.GetUserId(token);
@@ -63,11 +62,12 @@ public class MeditationService : IMeditationService
         var queryUser = context.Users.AsQueryable();
         var queryMeditation = context.Meditations.AsQueryable();
         var id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
-        var user = queryUser.First(x => x.Id == id);
+        var user = queryUser.First(x => x.Id == id).UserMeditations.Select(x => x.MeditationId);
         return queryMeditation
-            .Where(x =>  x.Language == language &&
-                !user.ListenedMeditation.Contains(x.id))
-            .ToArray();
+            .Where(x => x.Language == language)
+            .Select(x => x.id)
+            .Except(user)
+            .Select(x => queryMeditation.First(y => y.id == x));
     }
 
     public Meditation GetPopular(string language)
@@ -75,8 +75,8 @@ public class MeditationService : IMeditationService
         var query = context.Meditations.AsQueryable();
         var max = query
             .Where(x => x.Language == language)
-            .Max(x => x.ListenedToday);
-        return query.First(x => x.ListenedToday == max);
+            .Max(x => x.UserMeditations.Count);
+        return query.First(x => x.UserMeditations.Count == max && x.Language == language);
     }
 
     public void Create(CreateMeditationRequest model, string token)
@@ -103,14 +103,12 @@ public class MeditationService : IMeditationService
             File.Delete(resources.MeditationAudio + "/" + id + ".k");
             File.WriteAllBytes(resources.MeditationAudio + "/" + id + ".k", base64);
         }
-
         if (!string.IsNullOrEmpty(model.Audio))
         {
             var base64 = Convert.FromBase64String(model.Image);
             File.Delete(resources.MeditationImages + "/" + id + ".k");
             File.WriteAllBytes(resources.MeditationImages + "/" + id + ".k", base64);
         }
-
         context.Meditations.Update(meditation);
         context.SaveChangesAsync();
     }

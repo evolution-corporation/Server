@@ -16,7 +16,9 @@ public class AuthenticationService: IAuthenticationService
 
     public User GetUserByToken(string token)
     {
-        var decodedToken = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result;
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var decodedToken = task.Result; 
         var uid = new Guid(decodedToken.Uid);
         return context.Users.AsQueryable().First(x => x.Id == uid);
     }

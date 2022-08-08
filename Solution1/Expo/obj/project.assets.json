@@ -56,11 +56,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Govno_code\\работа\\EvolutionServer\\.net_server\\Solution1\\Expo\\Expo.csproj",
+      "projectUniqueName": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj",
       "projectName": "Expo",
-      "projectPath": "D:\\Govno_code\\работа\\EvolutionServer\\.net_server\\Solution1\\Expo\\Expo.csproj",
+      "projectPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj",
       "packagesPath": "C:\\Users\\kkish\\.nuget\\packages\\",
-      "outputPath": "D:\\Govno_code\\работа\\EvolutionServer\\.net_server\\Solution1\\Expo\\obj\\",
+      "outputPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\kkish\\AppData\\Roaming\\NuGet\\NuGet.Config"

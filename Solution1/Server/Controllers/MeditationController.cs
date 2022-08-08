@@ -15,34 +15,36 @@ public class MeditationController : ControllerBase
         this.service = service;
     }
 
-    [HttpGet("{token} {language}")]
+    [HttpGet]
     public IActionResult GetMeditation(string language,
         MeditationPreferences? preferences,
-        bool getIsNotListened = false,
-        bool popularToday = false,
-        int meditationId = 0,
-        string? token = null)
+        bool? getIsNotListened = false,
+        bool? popularToday = false,
+        int? meditationId = 0)
     {
-        if (meditationId != 0)
-            return Ok(service.GetById(meditationId, token));
+        var token = HttpContext.Request.Headers.Authorization.ToString();
+        if (meditationId != null)
+            return Ok(service.GetById((int)meditationId, token));
         if (preferences != null)
             return Ok(service.GetMeditationByPreferences(preferences));
-        if (!getIsNotListened)
-            return popularToday ? Ok(service.GetPopular(language)) : Ok(service.GetAllMeditation(language));
+        if (getIsNotListened != null && (bool)!getIsNotListened)
+            return popularToday != null &&(bool)popularToday ? Ok(service.GetPopular(language)) : Ok(service.GetAllMeditation(language));
         if (token is null) throw new UnauthorizedAccessException();
         return Ok(service.GetNotListened(token, language));
     }
 
-    [HttpPost("{token}")]
-    public IActionResult AddMeditation(CreateMeditationRequest model, string token)
+    [HttpPost]
+    public IActionResult AddMeditation(CreateMeditationRequest model)
     {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
         service.Create(model, token);
         return Ok(new { message = "Meditation created" });
     }
 
-    [HttpPatch("{token}")]
-    public IActionResult UpdateMeditation(int id, UpdateMeditationRequest model, string token)
+    [HttpPatch]
+    public IActionResult UpdateMeditation(int id, UpdateMeditationRequest model)
     {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
         service.Update(model, id, token);
         return Ok(new { message = "Meditation updated" });
     }

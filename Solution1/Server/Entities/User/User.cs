@@ -16,6 +16,7 @@ public class User
     public UserGender Gender { get; set; }
     public UserCategory Category { get; set; }
     public DateTime DateTimeRegistration { get; set; } = DateTime.Now;
-    public List<int> ListenedMeditation { get; set; } = new();
+    //public List<int> ListenedMeditation { get; set; } = new();
     public string ExpoToken { get; set; }
+    public IList<UserMeditation> UserMeditations { get; set; }
 }

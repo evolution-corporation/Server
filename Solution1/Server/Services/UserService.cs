@@ -58,7 +58,6 @@ public class UserService : IUserService
         File.WriteAllBytes(resources.UserImage + "/" + user.Id, base64);
         if (!token.Equals("test"))
             user.Id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
-        user.ListenedMeditation = new List<int>();
         _context.Users.Add(user);
         _context.SaveChanges();
     }
@@ -90,12 +89,10 @@ public class UserService : IUserService
 
     public void UserListened(string token, int meditationId)
     {
-        var userId = _context.GetUserId(token);
-        var user = _context.Users.AsQueryable().First(x => x.Id == userId);
-        var listenedBefore = user.ListenedMeditation.Count;
-        if (!user.ListenedMeditation.AsQueryable().Contains(meditationId)) user.ListenedMeditation.Add(meditationId);
-        if (user.ListenedMeditation.Count != listenedBefore)
-            _context.Meditations.Find(meditationId)!.ListenedToday.Add(userId);
+        var uid = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
+        var n = new UserMeditation(uid, meditationId, DateTime.Today);
+        if(!_context.UserMeditations.Contains(n))
+            _context.UserMeditations.Add(n);
         _context.SaveChanges();
     }
 

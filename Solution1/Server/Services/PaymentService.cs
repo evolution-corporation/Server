@@ -33,6 +33,13 @@ public class PaymentService : IPaymentService
 
     public void ConfirmPayment(string token, int id)
     {
+        var send = new Func<object?>(() =>
+        {
+            
+            return false;
+        });
+        
+        Thread.Sleep(10000);
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         context.Payments.AsQueryable().First(x => x.Id == id).Confirm = true;
     }

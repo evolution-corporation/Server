@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj": {}
+    "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\WebApplication1\\WebApplication1.csproj": {}
   },
   "projects": {
-    "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj": {
+    "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\WebApplication1\\WebApplication1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj",
-        "projectName": "Expo",
-        "projectPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj",
+        "projectUniqueName": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\WebApplication1\\WebApplication1.csproj",
+        "projectName": "WebApplication1",
+        "projectPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\WebApplication1\\WebApplication1.csproj",
         "packagesPath": "C:\\Users\\kkish\\.nuget\\packages\\",
-        "outputPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\obj\\",
+        "outputPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\WebApplication1\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\kkish\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -37,12 +37,6 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
-          "dependencies": {
-            "Newtonsoft.Json": {
-              "target": "Package",
-              "version": "[13.0.2-beta1, )"
-            }
-          },
           "imports": [
             "net461",
             "net462",
@@ -54,6 +48,9 @@
           "assetTargetFallback": true,
           "warn": true,
           "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }

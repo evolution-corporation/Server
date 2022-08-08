@@ -14,9 +14,10 @@ public class UserImage: ControllerBase
         _service = service;
     }
 
-    [HttpGet("{token}")]
-    public IActionResult GetUserImage(string token)
+    [HttpGet]
+    public IActionResult GetUserImage()
     {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
         return Ok(_service.GetUserImage(token));
     }
 }

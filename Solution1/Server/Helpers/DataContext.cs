@@ -16,6 +16,7 @@ public class DataContext : DbContext
     public DbSet<Subscribe> Subscribes { get; set; }
     public DbSet<Dmd> DMDs { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<UserMeditation> UserMeditations { get; set; }
 
     public DataContext(IConfiguration configuration)
     {
@@ -28,7 +29,13 @@ public class DataContext : DbContext
         //options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
         options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
     }
-    
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserMeditation>().HasKey(sc => new { sc.UserId, sc.MeditationId });       
+        base.OnModelCreating(modelBuilder);
+    }
+
     public Guid GetUserId(string token) => new(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
     
 }
