@@ -31,7 +31,7 @@ public class UsersController : ControllerBase
             return Ok(_userService.GetAll());
         var id = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         id.Wait();
-        var user = _userService.GetById(new Guid(id.Result.Uid));
+        var user = _userService.GetById(id.Result.Uid);
         return min != null && (bool)min ? Ok($"{user.Id + user.NickName}") : Ok(user);
     }
 
@@ -46,7 +46,9 @@ public class UsersController : ControllerBase
     [HttpPut]
     public IActionResult Update(string id, UpdateUserRequest model)
     {
-        _userService.Update(new Guid(id), model);
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(id);
+        task.Wait();
+        _userService.Update(task.Result.Uid, model);
         return Ok(new { message = "User updated" });
     }
 
@@ -57,7 +59,6 @@ public class UsersController : ControllerBase
         _userService.UserListened(token, meditationId);
         return Ok();
     }
-
 
     [HttpPatch]
     public IActionResult UpdateByUser(UpdateUserRequest model)

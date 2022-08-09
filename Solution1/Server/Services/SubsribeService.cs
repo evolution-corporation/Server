@@ -11,6 +11,7 @@ public interface ISubscribeService
    public void SubscribeUser(string token, int timeSubscribe);
 
    public void UnsubscribeUser(string token);
+   public Subscribe GetUserSubscribe(string token);
 }
 
 public class SubscribeService: ISubscribeService
@@ -38,6 +39,11 @@ public class SubscribeService: ISubscribeService
       context.Subscribes.Remove(oldSub);
       context.Subscribes.Add(sub);
       context.SaveChanges();
+   }
+
+   public Subscribe GetUserSubscribe(string id)
+   {
+      return context.Subscribes.AsQueryable().First(x => x.UserId == id);
    }
 
    public void UnsubscribeUser(string token)

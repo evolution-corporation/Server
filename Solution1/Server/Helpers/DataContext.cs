@@ -17,7 +17,7 @@ public class DataContext : DbContext
     public DbSet<Dmd> DMDs { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<UserMeditation> UserMeditations { get; set; }
-
+    public DbSet<Notification> Notifications { get; set; }
     public DataContext(IConfiguration configuration)
     {
         Configuration = configuration;
@@ -26,8 +26,8 @@ public class DataContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         // in memory database used for simplicity, change to a real db for production applications
-        //options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
-        options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
+        options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
+        //options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,6 +36,10 @@ public class DataContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public Guid GetUserId(string token) => new(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
-    
+    public string GetUserId(string token)
+    {
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        return task.Result.Uid;
+    }
 }

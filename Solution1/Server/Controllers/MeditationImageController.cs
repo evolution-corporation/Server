@@ -2,7 +2,7 @@
 using Server.Services;
 
 namespace Server.Controllers;
-
+//TODO: Написать пост фотографий для медитаций
 [ApiController]
 [Route("/meditation.image")]
 public class MeditationImageController: ControllerBase

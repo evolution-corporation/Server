@@ -10,9 +10,9 @@ using Models.Users;
 public interface IUserService
 {
     IEnumerable<User> GetAll();
-    User GetById(Guid id);
+    User GetById(string id);
     void Create(CreateUserRequest model, string token);
-    void Update(Guid id, UpdateUserRequest model);
+    void Update(string id, UpdateUserRequest model);
     void UpdateByUser(string token, UpdateUserRequest model);
     public void UserListened(string token, int meditationId);
 }
@@ -38,7 +38,7 @@ public class UserService : IUserService
         return _context.Users;
     }
 
-    public User GetById(Guid id)
+    public User GetById(string id)
     {
         return getUser(id);
     }
@@ -57,12 +57,12 @@ public class UserService : IUserService
         var base64 = Convert.FromBase64String(model.Image);
         File.WriteAllBytes(resources.UserImage + "/" + user.Id, base64);
         if (!token.Equals("test"))
-            user.Id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
+            user.Id = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
         _context.Users.Add(user);
         _context.SaveChanges();
     }
 
-    public void Update(Guid id, UpdateUserRequest model)
+    public void Update(string id, UpdateUserRequest model)
     {
         var user = getUser(id);
 
@@ -75,7 +75,7 @@ public class UserService : IUserService
     public void UpdateByUser(string token, UpdateUserRequest model)
     {
         var query = _context.Users.AsQueryable();
-        var uid = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
+        var uid = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
         var user = query.First(x => x.Id == uid);
         if (user == null)
             throw new AppException("User with token" + token + "not found");
@@ -89,14 +89,16 @@ public class UserService : IUserService
 
     public void UserListened(string token, int meditationId)
     {
-        var uid = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var uid = task.Result.Uid;
         var n = new UserMeditation(uid, meditationId, DateTime.Today);
         if(!_context.UserMeditations.Contains(n))
             _context.UserMeditations.Add(n);
         _context.SaveChanges();
     }
 
-    private User getUser(Guid id)
+    private User getUser(string id)
     {
         var query = _context.Users.AsQueryable();
         var user = query.FirstOrDefault(x => x.Id == id);

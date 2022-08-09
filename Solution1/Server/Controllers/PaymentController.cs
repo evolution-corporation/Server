@@ -17,7 +17,7 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Pay(string token)
+    public IActionResult GenerateUniqueId(string token)
     {
         return Ok(service.GenerateUniqueId(token));
     }

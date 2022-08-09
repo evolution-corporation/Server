@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Mvc;
 using Server.Helpers;
 using Server.Services;
 
@@ -10,11 +11,20 @@ public class SubscribeController: ControllerBase
 {
     private DataContext context;
     private ISubscribeService service;
-
     public SubscribeController(DataContext context, ISubscribeService service)
     {
         this.context = context;
         this.service = service;
+    }
+
+    [HttpGet]
+    public IActionResult GetUserSubscribe(string token)
+    {
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var id = task.Result.Uid;
+        
+        return Ok();
     }
 
     [HttpPost]

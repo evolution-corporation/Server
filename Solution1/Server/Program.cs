@@ -1,16 +1,18 @@
 ﻿using System.Text.Json.Serialization;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Newtonsoft.Json;
 using Server.Controllers;
 using Server.Entities;
 using Server.Helpers;
 using Server.Services;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 var builder = WebApplication.CreateBuilder(args);
 // add services to DI container
 {
     var services = builder.Services;
-    
+
     services.AddDbContext<DataContext>();
     services.AddCors();
     services.AddControllers().AddJsonOptions(x =>
@@ -22,8 +24,15 @@ var builder = WebApplication.CreateBuilder(args);
         x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
     services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-    
+
     services.Configure<Resources>(builder.Configuration.GetSection("Resources"));
+    var x = builder.Configuration.GetSection("TinkoffCredential").Value;
+    var credential = (TinkoffCredential)JsonSerializer.Deserialize(x, typeof(TinkoffCredential))!;
+    if (credential == null)
+    {
+        throw new ArgumentException("You forgot about Tinkoff credentials!");
+    }
+    services.AddSingleton(_ => credential);
     // configure DI for application services
     services.AddScoped<IUserService, UserService>();
     services.AddScoped<INicknameService, NicknameService>();
@@ -33,15 +42,16 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<ISubscribeService, SubscribeService>();
     services.AddScoped<IPaymentService, PaymentService>();
     services.AddScoped<IDmdService, DmdService>();
-    services.AddScoped<IMeditationAudioService, MeditationAudioService>();
     services.AddScoped<IMeditationImageService, MeditationImageService>();
+    services.AddScoped<INotificationService, NotificationService>();
     services.AddScoped<Resources>();
+    services.AddSingleton<Notificator>();
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {
         Credential =
             GoogleCredential.FromFile(builder.Configuration["GoogleCredential"]),
-        ProjectId = "<plants-336217>",
+        ProjectId = "plants-336217",
     });
 }
 
@@ -60,7 +70,6 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     app.MapControllers();
     app.MapHub<AsyncEnumerableHub>("/meditation.audio");
 }
-
 
 
 app.Run("http://localhost:8000");

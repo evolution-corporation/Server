@@ -1,4 +1,10 @@
-﻿using FirebaseAdmin.Auth;
+﻿using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using FirebaseAdmin.Auth;
+using Newtonsoft.Json;
+using Server.Entities;
 using Server.Entities.Payment;
 using Server.Helpers;
 
@@ -13,40 +19,50 @@ public interface IPaymentService
 public class PaymentService : IPaymentService
 {
     private readonly DataContext context;
-    private static int index;
-    private static bool isConfigured;
+    private readonly TinkoffCredential credential;
 
-    static PaymentService() => isConfigured = false;
-
-    public PaymentService(DataContext context) => this.context = context;
+    //TODO: Сделать проверку платежа от Тинькоффа
+    public PaymentService(DataContext context, TinkoffCredential credential)
+    {
+        this.context = context;
+        this.credential = credential;
+    }
 
     public int GenerateUniqueId(string token)
     {
-        var guid = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
-        if(!isConfigured)
-            Configure();
-        var i = index++;
-        context.Payments.Add(new Payment(i,guid));
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var guid = task.Result.Uid;
+        var payment = new Payment(guid);
+        context.Payments.Add(payment);
         context.SaveChanges();
-        return i;
+        return payment.Id;
     }
 
     public void ConfirmPayment(string token, int id)
     {
         var send = new Func<object?>(() =>
         {
+            var client = new HttpClient();
+            var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/CheckOrder");
+            var check = new CheckPayment(credential.TerminalKey, id, GenerateToken(id));
+            message.Content = new StringContent(JsonConvert.SerializeObject(check));
+            var answer = client.Send(message);
             
             return false;
         });
-        
+
         Thread.Sleep(10000);
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         context.Payments.AsQueryable().First(x => x.Id == id).Confirm = true;
     }
 
-    private void Configure()
+    private string GenerateToken(int orderId)
     {
-        isConfigured = true;
-        index = context.Payments.AsQueryable().MaxBy(x => x.Id)?.Id + 1 ?? 0;
+        //orderid, password,terminalkey
+        using var hash = SHA256.Create();
+        return string.Concat(hash
+            .ComputeHash(Encoding.UTF8.GetBytes($"{orderId}{credential.Password}{credential.TerminalKey}"))
+            .Select(item => item.ToString("x2")));
     }
 }

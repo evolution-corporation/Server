@@ -61,7 +61,7 @@ public class MeditationService : IMeditationService
     {
         var queryUser = context.Users.AsQueryable();
         var queryMeditation = context.Meditations.AsQueryable();
-        var id = new Guid(FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid);
+        var id = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
         var user = queryUser.First(x => x.Id == id).UserMeditations.Select(x => x.MeditationId);
         return queryMeditation
             .Where(x => x.Language == language)
@@ -83,10 +83,6 @@ public class MeditationService : IMeditationService
     {
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         var meditation = mapper.Map<Meditation>(model);
-        var audio = Convert.FromBase64String(model.Audio);
-        var image = Convert.FromBase64String(model.Image);
-        File.WriteAllBytes(resources.MeditationAudio + "/" + meditation.id + ".k", audio);
-        File.WriteAllBytes(resources.MeditationImages + "/" + meditation.id + ".k", image);
         context.Meditations.Add(meditation);
         context.SaveChangesAsync();
     }

@@ -16,7 +16,10 @@ public class AuthenticationController: ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-        var token = HttpContext.Request.Headers.Authorization.ToString();   
-        return Ok(service.GetUserByToken(token));
+        var token = HttpContext.Request.Headers.Authorization.ToString();
+        var user = service.GetUserByToken(token);
+        if (user == null)
+            return NotFound();
+        return Ok();
     }
 }
