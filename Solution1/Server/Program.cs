@@ -27,7 +27,8 @@ var builder = WebApplication.CreateBuilder(args);
 
     services.Configure<Resources>(builder.Configuration.GetSection("Resources"));
     var x = builder.Configuration.GetSection("TinkoffCredential").Value;
-    var credential = (TinkoffCredential)JsonSerializer.Deserialize(x, typeof(TinkoffCredential))!;
+    var str = File.ReadAllText(x);
+    var credential = (TinkoffCredential)JsonSerializer.Deserialize(str, typeof(TinkoffCredential))!;
     if (credential == null)
     {
         throw new ArgumentException("You forgot about Tinkoff credentials!");
