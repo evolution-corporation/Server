@@ -46,7 +46,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IMeditationImageService, MeditationImageService>();
     services.AddScoped<INotificationService, NotificationService>();
     services.AddScoped<Resources>();
-    services.AddSingleton<Notificator>();
+    services.AddScoped<Notificator>();
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {

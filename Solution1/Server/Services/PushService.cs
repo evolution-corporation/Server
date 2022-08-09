@@ -30,14 +30,16 @@ public static class PushService
         }
     }
 }
-
+//TODO: Переделать с singletone на static уведомления
 public class Notificator
 {
-    public DataContext context;
+    private static DataContext context;
+    private static bool defined = false;
 
     public Notificator(DataContext context)
     {
-        this.context = context;
+        if (defined) return;
+        Notificator.context = context;
         Task.Run(Invoke);
     }
 
