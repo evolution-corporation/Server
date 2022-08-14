@@ -1,4 +1,6 @@
-﻿namespace Server.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Server.Entities;
 
 public class Notification
 {
@@ -9,6 +11,7 @@ public class Notification
         NotificationFrequency = notificationFrequency;
     }
 
+    [Key]
     public string UserId { get; set; }
     public string ExpoToken { get; set; }
     public int NotificationFrequency { get; set; }

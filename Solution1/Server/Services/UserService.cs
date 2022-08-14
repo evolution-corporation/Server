@@ -49,13 +49,17 @@ public class UserService : IUserService
         if (_context.Users.Any(x => x.NickName == model.NickName))
             throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
                                    + GenerateUserNickname(model.NickName));
-        if (ContentFilter.ContainsAbsentWord(model.DisplayName.Split()) ||
-            ContentFilter.ContainsAbsentWord(model.Status.Split()) ||
-            ContentFilter.ContainsAbsentWord(model.DisplayName.Split()))
+        if (model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()) ||
+            model.Status != null && ContentFilter.ContainsAbsentWord(model.Status.Split()) ||
+            model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()))
             throw new AppException("Here is bad word");
         var user = _mapper.Map<User>(model);
-        var base64 = Convert.FromBase64String(model.Image);
-        File.WriteAllBytes(resources.UserImage + "/" + user.Id, base64);
+        if (model.Image != null)
+        {
+            var base64 = Convert.FromBase64String(model.Image);
+            File.WriteAllBytes(resources.UserImage + "/" + user.Id, base64);
+            user.HasPhoto = true;
+        }
         if (!token.Equals("test"))
             user.Id = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
         _context.Users.Add(user);
@@ -93,7 +97,7 @@ public class UserService : IUserService
         task.Wait();
         var uid = task.Result.Uid;
         var n = new UserMeditation(uid, meditationId, DateTime.Today);
-        if(!_context.UserMeditations.Contains(n))
+        if (!_context.UserMeditations.Contains(n))
             _context.UserMeditations.Add(n);
         _context.SaveChanges();
     }

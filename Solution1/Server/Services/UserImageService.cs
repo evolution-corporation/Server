@@ -24,7 +24,11 @@ public class UserImageService : IUserImageService
 
     public string GetUserImage(string token)
     {
-        var file = File.ReadAllBytes(resources.UserImage + "/" + context.GetUserId(token) + ".k");
+        var userId = context.GetUserId(token);
+        var user = context.Users.First(x => x.Id == userId);
+        if (!user.HasPhoto)
+            throw new ArgumentException("User don't have a photo");
+        var file = File.ReadAllBytes(resources.UserImage + "/" + userId + ".k");
         var base64 = Convert.ToBase64String(file);
         return base64;
     }

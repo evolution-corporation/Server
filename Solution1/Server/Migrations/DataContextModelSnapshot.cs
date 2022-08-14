@@ -81,6 +81,29 @@ namespace Server.Migrations
                     b.ToTable("Meditations");
                 });
 
+            modelBuilder.Entity("Server.Entities.Notification", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExpoToken")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsSubscribedToNotification")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastNotification")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("NotificationFrequency")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Server.Entities.Payment.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -95,8 +118,9 @@ namespace Server.Migrations
                     b.Property<DateTime>("PaymentDateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -105,9 +129,8 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.Entities.Subscribe", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
                     b.Property<int>("TimeSubscribe")
                         .HasColumnType("integer");
@@ -122,9 +145,8 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<string>("Birthday")
                         .IsRequired()
@@ -140,12 +162,11 @@ namespace Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ExpoToken")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("Gender")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("HasPhoto")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("NickName")
                         .IsRequired()
@@ -165,8 +186,8 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.Entities.UserMeditation", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
                     b.Property<int>("MeditationId")
                         .HasColumnType("integer");

@@ -26,13 +26,14 @@ public class DataContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         // in memory database used for simplicity, change to a real db for production applications
-        options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
-        //options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
+        //options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
+        options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UserMeditation>().HasKey(sc => new { sc.UserId, sc.MeditationId });       
+        modelBuilder.Entity<UserMeditation>().HasKey(sc => new { sc.UserId, sc.MeditationId });
+        modelBuilder.Entity<Notification>().HasKey(x => x.UserId);
         base.OnModelCreating(modelBuilder);
     }
 

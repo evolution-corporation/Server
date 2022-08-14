@@ -15,5 +15,6 @@ public class User
     public UserGender Gender { get; set; }
     public UserCategory Category { get; set; }
     public DateTime DateTimeRegistration { get; set; } = DateTime.Now;
+    public bool HasPhoto { get; set; } = false;
     public IList<UserMeditation> UserMeditations { get; set; }
 }
