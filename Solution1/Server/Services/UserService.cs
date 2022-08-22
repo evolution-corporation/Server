@@ -54,14 +54,25 @@ public class UserService : IUserService
             model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()))
             throw new AppException("Here is bad word");
         var user = _mapper.Map<User>(model);
-        if (model.Image != null)
-        {
-            var base64 = Convert.FromBase64String(model.Image);
-            File.WriteAllBytes(resources.UserImage + "/" + user.Id, base64);
-            user.HasPhoto = true;
-        }
+
         if (!token.Equals("test"))
-            user.Id = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
+        {
+            var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+            task.Wait();
+            user.Id = task.Result.Uid;
+        }
+        else
+            user.Id = new Random().Next().ToString();
+        if (model.Photo != null)
+        {
+            var photo = Convert.FromBase64String(model.Photo);
+            var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
+            file.Write(photo, 0, photo.Length);
+            file.Close();
+            user.HasPhoto = true;
+            //File.WriteAllBytes(resources.UserImage+"/"+user.Id,photo);
+        }
+
         _context.Users.Add(user);
         _context.SaveChanges();
     }
@@ -83,9 +94,19 @@ public class UserService : IUserService
         var user = query.First(x => x.Id == uid);
         if (user == null)
             throw new AppException("User with token" + token + "not found");
-        if (_context.Users.Any(x => x.NickName == model.NickName))
-            throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
-                                   + GenerateUserNickname(model.NickName));
+        if (model.NickName != null)
+            if (_context.Users.Any(x => x.NickName == model.NickName))
+                throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
+                                       + string.Join(",", GenerateUserNickname(model.NickName)));
+        if (model.Image != null)
+        {
+            if(user.HasPhoto)File.Delete(resources.UserImage + "/" + user.Id);
+            var photo = Convert.FromBase64String(model.Image);
+            var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
+            file.Write(photo, 0, photo.Length);
+            file.Close();
+            user.HasPhoto = true;
+        }
         _mapper.Map(model, user);
         _context.Users.Update(user);
         _context.SaveChanges();
@@ -110,7 +131,7 @@ public class UserService : IUserService
         return user;
     }
 
-    private IEnumerable<string> GenerateUserNickname(string nickname)
+    private string[] GenerateUserNickname(string nickname)
     {
         var list = new List<string>();
         var rnd = new Random();
