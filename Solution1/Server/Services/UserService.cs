@@ -11,7 +11,7 @@ public interface IUserService
 {
     IEnumerable<User> GetAll();
     User GetById(string id);
-    void Create(CreateUserRequest model, string token);
+    User Create(CreateUserRequest model, string token);
     void Update(string id, UpdateUserRequest model);
     void UpdateByUser(string token, UpdateUserRequest model);
     public void UserListened(string token, int meditationId);
@@ -43,7 +43,7 @@ public class UserService : IUserService
         return getUser(id);
     }
 
-    public void Create(CreateUserRequest model, string token)
+    public User Create(CreateUserRequest model, string token)
     {
         // validate
         if (_context.Users.Any(x => x.NickName == model.NickName))
@@ -55,18 +55,19 @@ public class UserService : IUserService
             throw new AppException("Here is bad word");
         var user = _mapper.Map<User>(model);
 
-        if (!token.Equals("test"))
+        if (token.Equals("test"))
+            user.Id = new Random().Next().ToString();
+        else
         {
             var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
             task.Wait();
             user.Id = task.Result.Uid;
         }
-        else
-            user.Id = new Random().Next().ToString();
+
         if (model.Photo != null)
         {
             var photo = Convert.FromBase64String(model.Photo);
-            var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
+            var file = File.Create(resources.UserImage + "/" + user.Id);
             file.Write(photo, 0, photo.Length);
             file.Close();
             user.HasPhoto = true;
@@ -75,6 +76,7 @@ public class UserService : IUserService
 
         _context.Users.Add(user);
         _context.SaveChanges();
+        return user;
     }
 
     public void Update(string id, UpdateUserRequest model)
@@ -100,13 +102,14 @@ public class UserService : IUserService
                                        + string.Join(",", GenerateUserNickname(model.NickName)));
         if (model.Image != null)
         {
-            if(user.HasPhoto)File.Delete(resources.UserImage + "/" + user.Id);
+            if (user.HasPhoto) File.Delete(resources.UserImage + "/" + user.Id);
             var photo = Convert.FromBase64String(model.Image);
             var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
             file.Write(photo, 0, photo.Length);
             file.Close();
             user.HasPhoto = true;
         }
+
         _mapper.Map(model, user);
         _context.Users.Update(user);
         _context.SaveChanges();

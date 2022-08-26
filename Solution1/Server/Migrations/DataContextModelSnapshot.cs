@@ -159,10 +159,10 @@ namespace Server.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("integer");
 
-                    b.Property<string>("NickName")
-                        .HasColumnType("text");
+                    b.Property<bool>("HasPhoto")
+                        .HasColumnType("boolean");
 
-                    b.Property<string>("Photo")
+                    b.Property<string>("NickName")
                         .HasColumnType("text");
 
                     b.Property<int>("Role")

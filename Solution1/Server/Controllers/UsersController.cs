@@ -1,4 +1,5 @@
-﻿using FirebaseAdmin.Auth;
+﻿using System.Security.Authentication;
+using FirebaseAdmin.Auth;
 
 namespace Server.Controllers;
 
@@ -23,15 +24,17 @@ public class UsersController : ControllerBase
     }
     
 
-    [HttpGet]
-    public IActionResult GetByIdWithShort(bool? min)
+    [HttpGet("{id}")]
+    public IActionResult GetByIdWithShort(string id,bool? min)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
         if (token.Equals(""))
             return Ok(_userService.GetAll());
-        var id = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        id.Wait();
-        var user = _userService.GetById(id.Result.Uid);
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        if (task.Result.Uid != id)
+            throw new AuthenticationException("You try to get user with another id");
+        var user = _userService.GetById(task.Result.Uid);
         return min != null && (bool)min ? Ok($"{user.Id + user.NickName}") : Ok(user);
     }
 
@@ -39,14 +42,14 @@ public class UsersController : ControllerBase
     public IActionResult Create(CreateUserRequest model)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
-        _userService.Create(model, token);
-        return Ok(new { message = "User created" });
+        var user = _userService.Create(model, token);
+        return Ok(user);
     }
 
     [HttpPut]
-    public IActionResult Update(string id, UpdateUserRequest model)
+    public IActionResult Update(string token, UpdateUserRequest model)
     {
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(id);
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         task.Wait();
         _userService.Update(task.Result.Uid, model);
         return Ok(new { message = "User updated" });
