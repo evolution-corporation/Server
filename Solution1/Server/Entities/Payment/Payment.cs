@@ -10,9 +10,9 @@ public class Payment
         UserId = userId;
     }
     
-    public int Id { get; set; } = Guid.NewGuid().GetHashCode();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string UserId { get; set; }
-    public DateTime PaymentDateTime { get; set; }
+    public DateTime PaymentDateTime { get; set; } = DateTime.Now;
 
     public bool Confirm { get; set; } = false;
 }

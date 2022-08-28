@@ -1,25 +1,25 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FirebaseAdmin.Auth;
 using Newtonsoft.Json;
 using Server.Entities;
 using Server.Entities.Payment;
 using Server.Helpers;
+using JsonException = System.Text.Json.JsonException;
 
 namespace Server.Services;
 
 public interface IPaymentService
 {
-    public int GenerateUniqueId(string token);
-    public void ConfirmPayment(string token, int id);
+    public string SubscribeUser(string token, bool recurrentPayment, SubscribeType type);
 }
 
 public class PaymentService : IPaymentService
 {
     private readonly DataContext context;
     private readonly TinkoffCredential credential;
+    private int paymentId;
+    private Payment payment;
 
     //TODO: Сделать проверку платежа от Тинькоффа
     public PaymentService(DataContext context, TinkoffCredential credential)
@@ -28,41 +28,67 @@ public class PaymentService : IPaymentService
         this.credential = credential;
     }
 
-    public int GenerateUniqueId(string token)
+    public string SubscribeUser(string token, bool recurrentPayment, SubscribeType type)
     {
         var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         task.Wait();
         var guid = task.Result.Uid;
-        var payment = new Payment(guid);
+        payment = new Payment(guid);
         context.Payments.Add(payment);
         context.SaveChanges();
-        return payment.Id;
+        var result = InitPayment(guid, recurrentPayment, SubcribeTypeConverter(type), payment.Id);
+        Task.Run(() => CheckPaymentResult(guid, type));
+        return result;
     }
 
-    public void ConfirmPayment(string token, int id)
+    private string InitPayment(string userId, bool recurrentPayment, int amount, string orderId)
     {
-        var send = new Func<object?>(() =>
+        var client = new HttpClient();
+        var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/Init");
+        var init = new Init(credential.TerminalKey, amount, orderId, recurrentPayment ? 'Y' : 'N', userId);
+        message.Content = new StringContent(JsonConvert.SerializeObject(init));
+        using var answer = client.Send(message);
+        var task = answer.Content.ReadFromJsonAsync<InitResponse>();
+        task.Wait();
+        var response = task.Result;
+        if (response == null)
+            throw new JsonException();
+        paymentId = response.PaymentId;
+        return response.PaymentURL;
+    }
+
+    private void CheckPaymentResult(string userId, SubscribeType type)
+    {
+        var client = new HttpClient();
+        var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/GetState");
+        var getState = new GetState(credential.TerminalKey,paymentId,credential.Password);
+        message.Content = new StringContent(JsonConvert.SerializeObject(getState));
+        while (!payment.Confirm)
         {
-            var client = new HttpClient();
-            var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/CheckOrder");
-            var check = new CheckPayment(credential.TerminalKey, id, GenerateToken(id));
-            message.Content = new StringContent(JsonConvert.SerializeObject(check));
-            var answer = client.Send(message);
-            
-            return false;
-        });
-
-        Thread.Sleep(10000);
-        FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        context.Payments.AsQueryable().First(x => x.Id == id).Confirm = true;
+            using var answer = client.Send(message);
+            var task = answer.Content.ReadFromJsonAsync<GetStateResponse>();
+            task.Wait();
+            var response = task.Result;
+            if(response == null)
+                continue;
+            if (response.OrderId == payment.Id && response.PaymentId == paymentId && response.ErrorCode.Equals("0"))
+            {
+                context.Payments.First(x => x.Id == payment.Id).Confirm = true;
+                context.Subscribes.Add(Subscribe.Convert(userId, type));
+                break;
+            }
+            Thread.Sleep(100);
+        }
     }
 
-    private string GenerateToken(int orderId)
+    private int SubcribeTypeConverter(SubscribeType type)
     {
-        //orderid, password,terminalkey
-        using var hash = SHA256.Create();
-        return string.Concat(hash
-            .ComputeHash(Encoding.UTF8.GetBytes($"{orderId}{credential.Password}{credential.TerminalKey}"))
-            .Select(item => item.ToString("x2")));
+        return type switch
+        {
+            SubscribeType.Week => 100,
+            SubscribeType.Month => 47900,
+            SubscribeType.Month6 => 199000,
+            _ => throw new NotImplementedException()
+        };
     }
 }

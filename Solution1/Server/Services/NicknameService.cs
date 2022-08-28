@@ -6,7 +6,7 @@ namespace Server.Services;
 
 public interface INicknameService
 {
-    public User GetUserByNickname(string nickname);
+    public User? GetUserByNickname(string nickname);
 }
 
 public class NicknameService: INicknameService
@@ -20,8 +20,8 @@ public class NicknameService: INicknameService
         this.mapper = mapper;
     }
 
-    public User GetUserByNickname(string nickname)
+    public User? GetUserByNickname(string nickname)
     {
-        return context.Users.AsQueryable().First(x => x.NickName.Equals(nickname));
+        return context.Users.AsQueryable().FirstOrDefault(x => x.NickName.Equals(nickname));
     }
 }

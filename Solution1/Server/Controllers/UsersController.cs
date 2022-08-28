@@ -66,8 +66,8 @@ public class UsersController : ControllerBase
     [HttpPatch]
     public IActionResult UpdateByUser(UpdateUserRequest model)
     {
-        var token = HttpContext.Request.Headers.Authorization.ToString();
-        _userService.UpdateByUser(token, model);
-        return Ok(new { message = "User updated" });
+        var token = HttpContext.Request.Headers.Authorization.ToString(); 
+        var user = _userService.UpdateByUser(token, model);
+        return Ok(user);
     }
 }

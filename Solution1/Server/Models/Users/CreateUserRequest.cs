@@ -8,11 +8,10 @@ public class CreateUserRequest
 {
 #pragma warning disable CS8618
     [Required] public string NickName { get; set; }
-    [Required] public string ExpoToken { get; set; }
 #pragma warning restore CS8618
 
     [Required] public DateTime Birthday { get; set; }
-
+    public string? ExpoToken { get; set; }
     public string? Status { get; set; }
 
     public UserGender Gender { get; set; }

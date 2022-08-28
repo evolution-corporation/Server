@@ -13,7 +13,7 @@ public interface IUserService
     User GetById(string id);
     User Create(CreateUserRequest model, string token);
     void Update(string id, UpdateUserRequest model);
-    void UpdateByUser(string token, UpdateUserRequest model);
+    User UpdateByUser(string token, UpdateUserRequest model);
     public void UserListened(string token, int meditationId);
 }
 
@@ -66,8 +66,9 @@ public class UserService : IUserService
 
         if (model.Photo != null)
         {
+            if (user.HasPhoto) File.Delete(resources.UserImage + "/" + user.Id);
             var photo = Convert.FromBase64String(model.Photo);
-            var file = File.Create(resources.UserImage + "/" + user.Id);
+            var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
             file.Write(photo, 0, photo.Length);
             file.Close();
             user.HasPhoto = true;
@@ -89,7 +90,7 @@ public class UserService : IUserService
         _context.SaveChanges();
     }
 
-    public void UpdateByUser(string token, UpdateUserRequest model)
+    public User UpdateByUser(string token, UpdateUserRequest model)
     {
         var query = _context.Users.AsQueryable();
         var uid = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
@@ -113,6 +114,7 @@ public class UserService : IUserService
         _mapper.Map(model, user);
         _context.Users.Update(user);
         _context.SaveChanges();
+        return user;
     }
 
     public void UserListened(string token, int meditationId)

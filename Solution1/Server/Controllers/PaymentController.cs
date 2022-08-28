@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Server.Entities;
 using Server.Entities.Payment;
 using Server.Services;
 
@@ -17,15 +18,10 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GenerateUniqueId(string token)
+    public IActionResult SubscribeUser(string token, SubscribeType type, bool? needRecurrent)
     {
-        return Ok(service.GenerateUniqueId(token));
+        var recurrent = needRecurrent ?? false;
+        return Ok(service.SubscribeUser(token, recurrent, type));
     }
-
-    [HttpPatch]
-    public IActionResult Confirm(string token,int id)
-    {
-        service.ConfirmPayment(token,id);
-        return Ok();
-    }
+    
 }

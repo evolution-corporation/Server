@@ -22,7 +22,7 @@ public class SubscribeService: ISubscribeService
    {
       this.context = context;
    }
-
+   //TODO: перенести подписку пользователя с клиента на сервер.
    public void SubscribeUser(string token, int timeSubscribe)
    {
       var userId = context.GetUserId(token);
@@ -30,14 +30,14 @@ public class SubscribeService: ISubscribeService
          throw new AuthenticationException("Subscription not paid");
 
       var oldSub = context.Subscribes.First(x => x.UserId == userId);
-      var sub = new Subscribe
-      {
-         UserId = userId,
-         WhenSubscribe = DateTime.Now,
-         TimeSubscribe = timeSubscribe + oldSub.TimeSubscribe
-      };
+      // var sub = new Subscribe
+      // {
+      //    UserId = userId,
+      //    WhenSubscribe = DateTime.Now,
+      //    RemainingTime = timeSubscribe + oldSub.RemainingTime
+      // };
       context.Subscribes.Remove(oldSub);
-      context.Subscribes.Add(sub);
+      //context.Subscribes.Add(sub);
       context.SaveChanges();
    }
 

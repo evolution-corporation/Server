@@ -1,8 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using Server.Helpers;
-
-namespace Server.Entities;
+﻿namespace Server.Entities;
 
 public class CheckPayment
 {
@@ -12,7 +8,6 @@ public class CheckPayment
         OrderId = orderId;
         Token = token;
     }
-
     public string TerminalKey { get; set; }
     public int OrderId { get; set; }
     public string Token { get; set; }

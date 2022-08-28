@@ -22,9 +22,8 @@ public class UserImageService : IUserImageService
         this.resources = resources;
     }
 
-    public string GetUserImage(string token)
+    public string GetUserImage(string userId)
     {
-        var userId = context.GetUserId(token);
         var user = context.Users.First(x => x.Id == userId);
         if (user.HasPhoto)
             throw new ArgumentException("User don't have a photo");

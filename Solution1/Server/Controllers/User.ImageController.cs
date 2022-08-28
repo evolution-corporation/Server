@@ -14,11 +14,10 @@ public class UserImage: ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public IActionResult GetUserImage()
+    [HttpGet("{id}")]
+    public IActionResult GetUserImage(string id)
     {
-        var token = HttpContext.Request.Headers.Authorization.ToString();
-        return Ok(_service.GetUserImage(token));
+        return Ok(_service.GetUserImage(id));
     }
 }
 

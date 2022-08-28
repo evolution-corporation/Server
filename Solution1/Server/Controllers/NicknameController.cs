@@ -15,6 +15,8 @@ public class NicknameController: ControllerBase
     public IActionResult GetUserByNickname(string nickname, bool isMinimumData)
     {
         var user = _service.GetUserByNickname(nickname);
+        if (user == null)
+            return NotFound();
         return isMinimumData ? Ok($"{user.NickName + user.Birthday + user.Category}") : Ok(user);
     }
 }
