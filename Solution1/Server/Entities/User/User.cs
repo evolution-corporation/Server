@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using Npgsql.Internal.TypeHandlers;
-
-namespace Server.Entities;
+﻿namespace Server.Entities;
 
 public class User
 {
@@ -15,6 +11,6 @@ public class User
     public UserGender Gender { get; set; }
     public UserCategory Category { get; set; }
     public DateTime DateTimeRegistration { get; set; } = DateTime.Now;
-    public bool HasPhoto { get; set; } 
+    public bool HasPhoto { get; set; }
     public IList<UserMeditation> UserMeditations { get; set; }
 }

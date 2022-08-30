@@ -13,11 +13,11 @@ public interface IMeditationService
     public IEnumerable<Meditation> GetNotListened(string token, string language);
     public Meditation GetPopular(string language);
 
-    public void Create(CreateMeditationRequest model, string token);
+    public void Create(CreateMeditationRequest model);
 
     public void Update(UpdateMeditationRequest model, int id, string token);
 
-    public IEnumerable<Meditation> GetMeditationByPreferences(MeditationPreferences preferences);
+    public int GetMeditationByPreferences(MeditationPreferences preferences);
 }
 
 public class MeditationService : IMeditationService
@@ -43,13 +43,11 @@ public class MeditationService : IMeditationService
         return meditation;
     }
 
-    public IEnumerable<Meditation> GetMeditationByPreferences(MeditationPreferences preferences)
+    public int GetMeditationByPreferences(MeditationPreferences preferences)
     {
-        return context.Meditations.AsQueryable().Where(x =>
-                x.CountDay == preferences.CountDay &&
-                x.Time == preferences.Time &&
-                preferences.TypeMeditation.Contains(x.TypeMeditation))
-            .ToArray();
+        return context.Meditations.AsQueryable().Count(x => x.CountDay == preferences.CountDay &&
+                                                            x.Time == preferences.Time &&
+                                                            preferences.TypeMeditation == x.TypeMeditation);
     }
 
     public IEnumerable<Meditation> GetAllMeditation(string language)
@@ -79,10 +77,23 @@ public class MeditationService : IMeditationService
         return query.First(x => x.UserMeditations.Count == max && x.Language == language);
     }
 
-    public void Create(CreateMeditationRequest model, string token)
+    public void Create(CreateMeditationRequest model)
     {
-        FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         var meditation = mapper.Map<Meditation>(model);
+        if (model.SubscriptionPhoto != null)
+        {
+            var photo = Convert.FromBase64String(model.SubscriptionPhoto);
+            var file = new FileStream(resources.MeditationSubscribtionImage + "/" + meditation.id, FileMode.Create);
+            file.Write(photo, 0, photo.Length);
+            file.Close();
+        }
+        if (model.MeditationPhoto != null)
+        {
+            var photo = Convert.FromBase64String(model.MeditationPhoto);
+            var file = new FileStream(resources.UserImage + "/" + meditation.id, FileMode.Create);
+            file.Write(photo, 0, photo.Length);
+            file.Close();
+        }
         context.Meditations.Add(meditation);
         context.SaveChangesAsync();
     }
@@ -99,12 +110,7 @@ public class MeditationService : IMeditationService
             File.Delete(resources.MeditationAudio + "/" + id + ".k");
             File.WriteAllBytes(resources.MeditationAudio + "/" + id + ".k", base64);
         }
-        if (!string.IsNullOrEmpty(model.Audio))
-        {
-            var base64 = Convert.FromBase64String(model.Image);
-            File.Delete(resources.MeditationImages + "/" + id + ".k");
-            File.WriteAllBytes(resources.MeditationImages + "/" + id + ".k", base64);
-        }
+
         context.Meditations.Update(meditation);
         context.SaveChangesAsync();
     }

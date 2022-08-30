@@ -15,6 +15,7 @@ public class MeditationController : ControllerBase
         this.service = service;
     }
 
+    //TODO: Вместе с медитацией, если есть отправить её описание
     [HttpGet]
     public IActionResult GetMeditation(string language,
         MeditationPreferences? preferences,
@@ -36,8 +37,7 @@ public class MeditationController : ControllerBase
     [HttpPost]
     public IActionResult AddMeditation(CreateMeditationRequest model)
     {
-        var token = HttpContext.Request.Headers.Authorization.ToString();
-        service.Create(model, token);
+        service.Create(model);
         return Ok(new { message = "Meditation created" });
     }
 

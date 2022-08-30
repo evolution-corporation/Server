@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expo", "Expo\Expo.csproj", "{1F9B18D2-56A6-4D04-A8CD-D6C86F9B16A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Payments", "Payments\Payments.csproj", "{5F846E78-A20F-4D6A-B020-08C7918E47EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{1F9B18D2-56A6-4D04-A8CD-D6C86F9B16A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F9B18D2-56A6-4D04-A8CD-D6C86F9B16A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F9B18D2-56A6-4D04-A8CD-D6C86F9B16A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F846E78-A20F-4D6A-B020-08C7918E47EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F846E78-A20F-4D6A-B020-08C7918E47EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F846E78-A20F-4D6A-B020-08C7918E47EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F846E78-A20F-4D6A-B020-08C7918E47EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

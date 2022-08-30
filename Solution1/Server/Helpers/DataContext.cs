@@ -10,7 +10,7 @@ using Entities;
 
 public class DataContext : DbContext
 {
-    protected readonly IConfiguration Configuration;
+    private readonly IConfiguration Configuration;
     public DbSet<User> Users { get; set; }
     public DbSet<Meditation> Meditations { get; set; }
     public DbSet<Subscribe> Subscribes { get; set; }
@@ -18,6 +18,8 @@ public class DataContext : DbContext
     public DbSet<Payment> Payments { get; set; }
     public DbSet<UserMeditation> UserMeditations { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<MeditationSubscription> MeditationSubscriptions { get; set; }
+
     public DataContext(IConfiguration configuration)
     {
         Configuration = configuration;
@@ -25,7 +27,6 @@ public class DataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        // in memory database used for simplicity, change to a real db for production applications
         //options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
         options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
     }

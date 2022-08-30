@@ -6,7 +6,7 @@ namespace Server.Models.Meditation;
 public class MeditationPreferences
 {
     [Required]
-    public TypeMeditation[] TypeMeditation { get; set; }
+    public TypeMeditation TypeMeditation { get; set; }
     [Required]
     public CountDayMeditation CountDay { get; set; }
     [Required]

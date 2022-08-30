@@ -37,7 +37,7 @@ public class UsersController : ControllerBase
         var user = _userService.GetById(task.Result.Uid);
         return min != null && (bool)min ? Ok($"{user.Id + user.NickName}") : Ok(user);
     }
-
+    
     [HttpPost]
     public IActionResult Create(CreateUserRequest model)
     {

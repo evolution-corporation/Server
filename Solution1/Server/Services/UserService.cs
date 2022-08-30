@@ -66,7 +66,6 @@ public class UserService : IUserService
 
         if (model.Photo != null)
         {
-            if (user.HasPhoto) File.Delete(resources.UserImage + "/" + user.Id);
             var photo = Convert.FromBase64String(model.Photo);
             var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
             file.Write(photo, 0, photo.Length);
