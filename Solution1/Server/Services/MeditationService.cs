@@ -17,7 +17,8 @@ public interface IMeditationService
 
     public void Update(UpdateMeditationRequest model, int id, string token);
 
-    public int GetMeditationByPreferences(MeditationPreferences preferences);
+    public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences);
+    public int GetCountOfMeditation(MeditationPreferences preferences);
 }
 
 public class MeditationService : IMeditationService
@@ -43,11 +44,16 @@ public class MeditationService : IMeditationService
         return meditation;
     }
 
-    public int GetMeditationByPreferences(MeditationPreferences preferences)
+    public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences)
     {
-        return context.Meditations.AsQueryable().Count(x => x.CountDay == preferences.CountDay &&
+        return context.Meditations.AsQueryable().Where(x => x.CountDay == preferences.CountDay &&
                                                             x.Time == preferences.Time &&
-                                                            preferences.TypeMeditation == x.TypeMeditation);
+                                                            preferences.TypeMeditation == x.TypeMeditation).Take(10).ToArray();
+    }
+
+    public int GetCountOfMeditation(MeditationPreferences preferences)
+    {
+        return context.Meditations.AsQueryable().Count(x => x.TypeMeditation == preferences.TypeMeditation);
     }
 
     public IEnumerable<Meditation> GetAllMeditation(string language)

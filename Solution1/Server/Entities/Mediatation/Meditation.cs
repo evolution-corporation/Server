@@ -11,7 +11,5 @@ public class Meditation
     public CountDayMeditation CountDay { get; set; }
     public TimeMeditation Time { get; set; }
     public bool IsSubscribed { get; set; }
-
-    public MeditationSubscription? Subscription { get; set; }
     public IList<UserMeditation> UserMeditations { get; set; }
 }

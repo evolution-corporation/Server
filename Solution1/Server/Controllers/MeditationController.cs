@@ -30,8 +30,15 @@ public class MeditationController : ControllerBase
             return Ok(service.GetMeditationByPreferences(preferences));
         if (getIsNotListened != null && (bool)!getIsNotListened)
             return popularToday != null &&(bool)popularToday ? Ok(service.GetPopular(language)) : Ok(service.GetAllMeditation(language));
-        if (token is null) throw new UnauthorizedAccessException();
+        if (token is null)
+            throw new UnauthorizedAccessException();
         return Ok(service.GetNotListened(token, language));
+    }
+    
+    [HttpPut]
+    public IActionResult GetCountOfMeditation(MeditationPreferences preferences)
+    {
+        return Ok(service.GetCountOfMeditation(preferences));
     }
 
     [HttpPost]
@@ -40,6 +47,8 @@ public class MeditationController : ControllerBase
         service.Create(model);
         return Ok(new { message = "Meditation created" });
     }
+
+    
 
     [HttpPatch]
     public IActionResult UpdateMeditation(int id, UpdateMeditationRequest model)

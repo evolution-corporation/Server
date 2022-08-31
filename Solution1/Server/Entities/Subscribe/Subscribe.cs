@@ -15,6 +15,10 @@ public class Subscribe
         RemainingTime = remaining;
     }
 
+    public Subscribe()
+    {
+    }
+
     public static Subscribe Convert(string userId, SubscribeType type)
     {
         return new Subscribe(userId, type switch
