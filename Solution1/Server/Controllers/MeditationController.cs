@@ -15,7 +15,6 @@ public class MeditationController : ControllerBase
         this.service = service;
     }
 
-    //TODO: Вместе с медитацией, если есть отправить её описание
     [HttpGet]
     public IActionResult GetMeditation(string language,
         MeditationPreferences? preferences,
@@ -29,17 +28,17 @@ public class MeditationController : ControllerBase
         if (preferences != null)
             return Ok(service.GetMeditationByPreferences(preferences));
         if (getIsNotListened != null && (bool)!getIsNotListened)
-            return popularToday != null &&(bool)popularToday ? Ok(service.GetPopular(language)) : Ok(service.GetAllMeditation(language));
+            return popularToday != null && (bool)popularToday
+                ? Ok(service.GetPopular(language))
+                : Ok(service.GetAllMeditation(language));
         if (token is null)
             throw new UnauthorizedAccessException();
         return Ok(service.GetNotListened(token, language));
     }
-    
-    [HttpPut]
-    public IActionResult GetCountOfMeditation(MeditationPreferences preferences)
-    {
-        return Ok(service.GetCountOfMeditation(preferences));
-    }
+
+    [HttpGet("/meditation.count")]
+    public IActionResult GetCountOfMeditation(MeditationPreferences preferences) =>
+        Ok(service.GetCountOfMeditation(preferences));
 
     [HttpPost]
     public IActionResult AddMeditation(CreateMeditationRequest model)
@@ -47,8 +46,6 @@ public class MeditationController : ControllerBase
         service.Create(model);
         return Ok(new { message = "Meditation created" });
     }
-
-    
 
     [HttpPatch]
     public IActionResult UpdateMeditation(int id, UpdateMeditationRequest model)

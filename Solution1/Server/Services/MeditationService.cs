@@ -8,7 +8,7 @@ namespace Server.Services;
 
 public interface IMeditationService
 {
-    public Meditation GetById(int id, string token);
+    public object GetById(int id, string token);
     public IEnumerable<Meditation> GetAllMeditation(string language);
     public IEnumerable<Meditation> GetNotListened(string token, string language);
     public Meditation GetPopular(string language);
@@ -34,21 +34,23 @@ public class MeditationService : IMeditationService
         this.resources = resources;
     }
 
-    public Meditation GetById(int id, string token)
+    public object GetById(int id, string token)
     {
         var userId = context.GetUserId(token);
-        var meditation = context.Meditations.AsQueryable().First(x => x.id == id);
         var sub = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == userId);
+        var meditation = context.Meditations.AsQueryable().First(x => x.id == id);
+        var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.MeditationId == id);
         if (meditation.IsSubscribed && sub == null)
             throw new ArgumentException("User did not have subscription");
-        return meditation;
+        return new { Meditation = meditation, Subscription = subscription};
     }
 
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences)
     {
         return context.Meditations.AsQueryable().Where(x => x.CountDay == preferences.CountDay &&
                                                             x.Time == preferences.Time &&
-                                                            preferences.TypeMeditation == x.TypeMeditation).Take(10).ToArray();
+                                                            preferences.TypeMeditation == x.TypeMeditation)
+            .ToArray();
     }
 
     public int GetCountOfMeditation(MeditationPreferences preferences)
