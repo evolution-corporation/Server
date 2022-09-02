@@ -24,7 +24,7 @@ public class AsyncEnumerableHub : Hub
         int meditationId)
     {
         var channel = Channel.CreateUnbounded<byte>();
-        var stream = new BufferedStream(File.OpenRead($"{resources.MeditationAudio}/{meditationId}.mp3"));
+        var stream = new BufferedStream(File.OpenRead($"{resources.MeditationAudio}/{meditationId}"));
         // We don't want to await WriteItemsAsync, otherwise we'd end up waiting 
         // for all the items to be written before returning the channel back to
         // the client.
@@ -36,7 +36,7 @@ public class AsyncEnumerableHub : Hub
     public async Task PostAudio(IAsyncEnumerable<byte> stream, int meditationId)
     {
         var file = new BufferedStream(
-            new FileStream($"{resources.MeditationAudio}/{meditationId}.mp3", FileMode.Create));
+            new FileStream($"{resources.MeditationAudio}/{meditationId}", FileMode.Create));
         await foreach (var item in stream) file.WriteByte(item);
     }
 
