@@ -42,7 +42,7 @@ public class MeditationService : IMeditationService
         var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.MeditationId == id);
         if (meditation.IsSubscribed && sub == null)
             throw new ArgumentException("User did not have subscription");
-        return new { Meditation = meditation, Subscription = subscription};
+        return new { Meditation = meditation, Subscription = subscription };
     }
 
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences)
@@ -95,6 +95,7 @@ public class MeditationService : IMeditationService
             file.Write(photo, 0, photo.Length);
             file.Close();
         }
+
         if (model.MeditationPhoto != null)
         {
             var photo = Convert.FromBase64String(model.MeditationPhoto);
@@ -102,6 +103,8 @@ public class MeditationService : IMeditationService
             file.Write(photo, 0, photo.Length);
             file.Close();
         }
+
+        if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
         context.Meditations.Add(meditation);
         context.SaveChangesAsync();
     }

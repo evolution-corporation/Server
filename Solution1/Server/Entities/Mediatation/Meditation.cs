@@ -3,7 +3,7 @@
 //TODO: Обнуление счётчика прослушиваний
 public class Meditation
 {
-    public int id { get; set; } = Guid.NewGuid().GetHashCode();
+    public int id { get; set; } = Math.Abs(Guid.NewGuid().GetHashCode());
     public string? Language { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
