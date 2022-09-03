@@ -1,25 +1,37 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿// See https://aka.ms/new-console-template for more information
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Ninject;
+using Payments;
 
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+static StandardKernel ConfigureContainer()
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    var container = new StandardKernel();
+    container.Bind<Context>().To<Context>();
+    var file = File.ReadLines("../Server/appsettings.json").ToArray();
+    var connectionString = (ConnectionString)JsonSerializer.Deserialize($"{{{file[3]}}}", typeof(ConnectionString))!;
+    container.Bind<ConnectionString>().ToMethod(_ => connectionString).InSingletonScope();
+    return container;
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+static void CreateNewPayment()
+{
+    
+}
 
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.MapRazorPages();
-
-app.Run();
+var container = ConfigureContainer();
+while (true)
+{
+    var context = container.Get<Context>();
+    var client = new HttpClient();
+    var message = new HttpRequestMessage(HttpMethod.Post,"	https://securepay.tinkoff.ru/v2/Charge");
+    var subscribes = context.Subscribes;
+    foreach (var sub in subscribes)
+    {
+        if (sub.RemainingTime == 0)
+        {
+            
+        }
+    }
+}

@@ -33,7 +33,10 @@ public class PaymentService : IPaymentService
         var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         task.Wait();
         var guid = task.Result.Uid;
-        payment = new Payment(guid);
+        payment = new Payment(guid)
+        {
+            RecurrentPayment = recurrentPayment
+        };
         context.Payments.Add(payment);
         context.SaveChanges();
         var result = InitPayment(guid, recurrentPayment, SubcribeTypeConverter(type), payment.Id);

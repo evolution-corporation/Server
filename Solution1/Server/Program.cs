@@ -1,9 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
-using Newtonsoft.Json;
 using Server.Controllers;
-using Server.Entities;
 using Server.Helpers;
 using Server.Services;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -32,9 +30,7 @@ var builder = WebApplication.CreateBuilder(args);
     var str = File.ReadAllText(x);
     var credential = (TinkoffCredential)JsonSerializer.Deserialize(str, typeof(TinkoffCredential))!;
     if (credential == null)
-    {
         throw new ArgumentException("You forgot about Tinkoff credentials!");
-    }
     services.AddSingleton(_ => credential);
     // configure DI for application services
     services.AddScoped<IUserService, UserService>();
@@ -72,6 +68,5 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     app.MapControllers();
     app.MapHub<AsyncEnumerableHub>("/meditation.audio");
 }
-
 
 app.Run("http://localhost:8000");

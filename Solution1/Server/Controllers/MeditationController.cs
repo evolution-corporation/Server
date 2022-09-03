@@ -16,11 +16,10 @@ public class MeditationController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetMeditation(string language,
-        MeditationPreferences? preferences,
+    public IActionResult GetMeditation(MeditationPreferences? preferences,
         bool? getIsNotListened = false,
         bool? popularToday = false,
-        int? meditationId = 0)
+        int? meditationId = 0, string language = "ru")
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
         if (meditationId != null)
@@ -37,8 +36,8 @@ public class MeditationController : ControllerBase
     }
 
     [HttpGet("/meditation.count")]
-    public IActionResult GetCountOfMeditation(MeditationPreferences preferences) =>
-        Ok(service.GetCountOfMeditation(preferences));
+    public IActionResult GetCountOfMeditation(MeditationPreferences? preferences) =>
+        Ok(new {count = service.GetCountOfMeditation(preferences)});
 
     [HttpPost]
     public IActionResult AddMeditation(CreateMeditationRequest model)
