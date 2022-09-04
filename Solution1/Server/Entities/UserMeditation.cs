@@ -2,7 +2,9 @@
 
 public class UserMeditation
 {
+#pragma warning disable CS8618
     public UserMeditation(string userId,int meditationId, DateTime time)
+#pragma warning restore CS8618
     {
         UserId = userId;
         MeditationId = meditationId;

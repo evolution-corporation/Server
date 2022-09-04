@@ -9,7 +9,7 @@ namespace Server.Services;
 public interface IMeditationService
 {
     public object GetById(int id, string token);
-    public IEnumerable<Meditation> GetAllMeditation(string language);
+    public object GetAllMeditation(string language, int countOfMeditations);
     public IEnumerable<Meditation> GetNotListened(string token, string language);
     public Meditation GetPopular(string language);
 
@@ -18,7 +18,6 @@ public interface IMeditationService
     public void Update(UpdateMeditationRequest model, int id, string token);
 
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences);
-    public int GetCountOfMeditation(MeditationPreferences? preferences);
 }
 
 public class MeditationService : IMeditationService
@@ -53,19 +52,15 @@ public class MeditationService : IMeditationService
                 (preferences.TypeMeditation == null || preferences.TypeMeditation == x.TypeMeditation))
             .ToArray();
     }
+    
 
-    public int GetCountOfMeditation(MeditationPreferences? preferences)
+    public object GetAllMeditation(string language, int countOfMeditations)
     {
-        return preferences == null
-            ? context.Meditations.AsQueryable().Count()
-            : context.Meditations.AsQueryable().Count(x =>
-                x.TypeMeditation == preferences.TypeMeditation || preferences.TypeMeditation == null);
-        ;
-    }
-
-    public IEnumerable<Meditation> GetAllMeditation(string language)
-    {
-        return context.Meditations.AsQueryable().Where(x => x.Language == language).ToArray();
+        var meditations = context.Meditations.AsQueryable().Where(x => x.Language == language).ToArray();
+        return new
+        {
+            meditations, meditations.Length
+        };
     }
 
     public IEnumerable<Meditation> GetNotListened(string token, string language)
@@ -120,13 +115,6 @@ public class MeditationService : IMeditationService
         var query = context.Meditations.AsQueryable();
         var meditation = query.First(x => x.id == id);
         mapper.Map(model, meditation);
-        if (!string.IsNullOrEmpty(model.Audio))
-        {
-            var base64 = Convert.FromBase64String(model.Audio);
-            File.Delete(resources.MeditationAudio + "/" + id + ".k");
-            File.WriteAllBytes(resources.MeditationAudio + "/" + id + ".k", base64);
-        }
-
         context.Meditations.Update(meditation);
         context.SaveChangesAsync();
     }

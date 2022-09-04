@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Server.Entities;
 using Server.Models.Meditation;
 using Server.Services;
 
@@ -16,11 +17,16 @@ public class MeditationController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetMeditation(MeditationPreferences? preferences,
+    public IActionResult GetMeditation(TypeMeditation? type, CountDayMeditation? day, TimeMeditation? time,
+        int countOfMeditations,
+        string? language = "ru",
         bool? getIsNotListened = false,
-        bool? popularToday = false,
-        int? meditationId = 0, string language = "ru")
+        int? meditationId = 0,
+        bool? popularToday = false)
     {
+        MeditationPreferences? preferences = null;
+        if (type != null || day != null || time != null)
+            preferences = new MeditationPreferences { TypeMeditation = type, CountDay = day, Time = time };
         var token = HttpContext.Request.Headers.Authorization.ToString();
         if (meditationId != null)
             return Ok(service.GetById((int)meditationId, token));
@@ -29,15 +35,11 @@ public class MeditationController : ControllerBase
         if (getIsNotListened != null && (bool)!getIsNotListened)
             return popularToday != null && (bool)popularToday
                 ? Ok(service.GetPopular(language))
-                : Ok(service.GetAllMeditation(language));
+                : Ok(service.GetAllMeditation(language, countOfMeditations));
         if (token is null)
             throw new UnauthorizedAccessException();
         return Ok(service.GetNotListened(token, language));
     }
-
-    [HttpGet("/meditation.count")]
-    public IActionResult GetCountOfMeditation(MeditationPreferences? preferences) =>
-        Ok(new {count = service.GetCountOfMeditation(preferences)});
 
     [HttpPost]
     public IActionResult AddMeditation(CreateMeditationRequest model)

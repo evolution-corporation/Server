@@ -2,7 +2,9 @@
 
 public class User
 {
+#pragma warning disable CS8618
     public string Id { get; set; }
+#pragma warning restore CS8618
     public string? NickName { get; set; }
     public string? Birthday { get; set; }
     public string? DisplayName { get; set; }
@@ -12,5 +14,6 @@ public class User
     public UserCategory Category { get; set; }
     public DateTime DateTimeRegistration { get; set; } = DateTime.Now;
     public bool HasPhoto { get; set; }
-    public IList<UserMeditation> UserMeditations { get; set; }
+    // ReSharper disable once CollectionNeverUpdated.Global
+    public IList<UserMeditation>? UserMeditations { get; set; }
 }
