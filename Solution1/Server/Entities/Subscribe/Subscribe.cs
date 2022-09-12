@@ -7,12 +7,14 @@ public class Subscribe
     [Key] public string UserId { get; set; }
     public DateTime WhenSubscribe { get; set; }
     public int RemainingTime { get; set; }
+    public SubscribeType Type { get; set; }
 
-    private Subscribe(string userId, int remaining)
+    private Subscribe(string userId, int remaining, SubscribeType type)
     {
         UserId = userId;
         WhenSubscribe = DateTime.Today;
         RemainingTime = remaining;
+        Type = type;
     }
 
     public Subscribe()
@@ -27,6 +29,6 @@ public class Subscribe
             SubscribeType.Month => 90,
             SubscribeType.Month6 => 180,
             _ => 0
-        });
+        }, type);
     }
 }

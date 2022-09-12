@@ -22,12 +22,15 @@ var builder = WebApplication.CreateBuilder(args);
         x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
     services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-     var resourceSection = builder.Configuration.GetSection("Resources");
-     var resources = new Resources{MeditationAudio = resourceSection["MeditationAudio"],MeditationImages = resourceSection["MeditationImages"],UserImage = resourceSection["UserImage"]};
+    var resourceSection = builder.Configuration.GetSection("Resources");
+    var resources = new Resources
+    {
+        MeditationAudio = resourceSection["MeditationAudio"], MeditationImages = resourceSection["MeditationImages"],
+        UserImage = resourceSection["UserImage"]
+    };
     services.AddSingleton(_ => resources);
     //services.Configure<Resources>(builder.Configuration.GetSection("Resources"));
-    var x = builder.Configuration.GetSection("TinkoffCredential").Value;
-    var str = File.ReadAllText(x);
+    var str = File.ReadAllText(builder.Configuration.GetSection("TinkoffCredential").Value);
     var credential = (TinkoffCredential)JsonSerializer.Deserialize(str, typeof(TinkoffCredential))!;
     if (credential == null)
         throw new ArgumentException("You forgot about Tinkoff credentials!");
@@ -43,6 +46,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IDmdService, DmdService>();
     services.AddScoped<IMeditationImageService, MeditationImageService>();
     services.AddScoped<INotificationService, NotificationService>();
+    services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
     services.AddScoped<Notificator>();
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions

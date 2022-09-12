@@ -2,6 +2,6 @@
 
 public class TinkoffCredential
 {
-    public string? TerminalKey { get; set; }
-    public string? Password { get; set; }
+    public string TerminalKey { get; set; } = null!;
+    public string Password { get; set; } = null!;
 }

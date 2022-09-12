@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using FirebaseAdmin.Auth;
-using Newtonsoft.Json;
 using Server.Entities;
 using Server.Entities.Payment;
 using Server.Helpers;
@@ -35,12 +35,13 @@ public class PaymentService : IPaymentService
         var guid = task.Result.Uid;
         payment = new Payment(guid)
         {
-            RecurrentPayment = recurrentPayment
+            RecurrentPayment = recurrentPayment,
+            Amount = SubcribeTypeConverter(type)
         };
         context.Payments.Add(payment);
         context.SaveChanges();
         var result = InitPayment(guid, recurrentPayment, SubcribeTypeConverter(type), payment.Id);
-        Task.Run(() => CheckPaymentResult(guid, type));
+        // Task.Run(() => CheckPaymentResult(guid, type));
         return result;
     }
 
@@ -49,7 +50,7 @@ public class PaymentService : IPaymentService
         var client = new HttpClient();
         var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/Init");
         var init = new Init(credential.TerminalKey, amount, orderId, recurrentPayment ? 'Y' : 'N', userId);
-        message.Content = new StringContent(JsonConvert.SerializeObject(init));
+        message.Content = new StringContent(JsonSerializer.Serialize(init));
         using var answer = client.Send(message);
         var task = answer.Content.ReadFromJsonAsync<InitResponse>();
         task.Wait();
@@ -58,30 +59,6 @@ public class PaymentService : IPaymentService
             throw new JsonException();
         paymentId = response.PaymentId;
         return response.PaymentURL;
-    }
-
-    private void CheckPaymentResult(string userId, SubscribeType type)
-    {
-        var client = new HttpClient();
-        var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/GetState");
-        var getState = new GetState(credential.TerminalKey,paymentId,credential.Password);
-        message.Content = new StringContent(JsonConvert.SerializeObject(getState));
-        while (!payment.Confirm)
-        {
-            using var answer = client.Send(message);
-            var task = answer.Content.ReadFromJsonAsync<GetStateResponse>();
-            task.Wait();
-            var response = task.Result;
-            if(response == null)
-                continue;
-            if (response.OrderId == payment.Id && response.PaymentId == paymentId && response.ErrorCode.Equals("0"))
-            {
-                context.Payments.First(x => x.Id == payment.Id).Confirm = true;
-                context.Subscribes.Add(Subscribe.Convert(userId, type));
-                break;
-            }
-            Thread.Sleep(100);
-        }
     }
 
     private int SubcribeTypeConverter(SubscribeType type)

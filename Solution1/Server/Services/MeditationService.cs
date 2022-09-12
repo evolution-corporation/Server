@@ -36,10 +36,10 @@ public class MeditationService : IMeditationService
     public object GetById(int id, string token)
     {
         var userId = context.GetUserId(token);
-        var sub = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == userId);
+        var sub = context.Users.AsQueryable().First(x => x.Id == userId).IsSubscribed;
         var meditation = context.Meditations.AsQueryable().First(x => x.id == id);
         var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.MeditationId == id);
-        if (meditation.IsSubscribed && sub == null)
+        if (meditation.IsSubscribed && sub)
             throw new ArgumentException("User did not have subscription");
         return new { Meditation = meditation, Subscription = subscription };
     }
