@@ -30,7 +30,8 @@ var builder = WebApplication.CreateBuilder(args);
     };
     services.AddSingleton(_ => resources);
     //services.Configure<Resources>(builder.Configuration.GetSection("Resources"));
-    var str = File.ReadAllText(builder.Configuration.GetSection("TinkoffCredential").Value);
+    //TODO: Перделать Tinkoff Credential на прямую загрузку из appsettings.json
+    var str = builder.Configuration["TinkoffCredential"];
     var credential = (TinkoffCredential)JsonSerializer.Deserialize(str, typeof(TinkoffCredential))!;
     if (credential == null)
         throw new ArgumentException("You forgot about Tinkoff credentials!");
@@ -52,11 +53,10 @@ var builder = WebApplication.CreateBuilder(args);
     FirebaseApp.Create(new AppOptions
     {
         Credential =
-            GoogleCredential.FromFile(builder.Configuration["GoogleCredential"]),
+            GoogleCredential.FromJson(builder.Configuration["GoogleCredential"]),
         ProjectId = "plants-336217",
     });
 }
-
 var app = builder.Build();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 {
