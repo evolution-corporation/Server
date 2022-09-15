@@ -13,8 +13,8 @@ using Server.Helpers;
 namespace Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220823134722_init")]
-    partial class init
+    [Migration("20220913102812_Rework")]
+    partial class Rework
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,7 +34,6 @@ namespace Server.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<List<int>>("MeditationsId")
-                        .IsRequired()
                         .HasColumnType("integer[]");
 
                     b.Property<string>("Name")
@@ -79,6 +78,31 @@ namespace Server.Migrations
                     b.ToTable("Meditations");
                 });
 
+            modelBuilder.Entity("Server.Entities.MeditationSubscription", b =>
+                {
+                    b.Property<int>("MeditationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MeditationId"));
+
+                    b.Property<string>("Headers")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PayloadText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Subscription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("MeditationId");
+
+                    b.ToTable("MeditationSubscriptions");
+                });
+
             modelBuilder.Entity("Server.Entities.Notification", b =>
                 {
                     b.Property<string>("UserId")
@@ -104,17 +128,20 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.Entities.Payment.Payment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("Confirm")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("PaymentDateTime")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("RecurrentPayment")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -130,7 +157,10 @@ namespace Server.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("text");
 
-                    b.Property<int>("TimeSubscribe")
+                    b.Property<int>("RemainingTime")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("WhenSubscribe")
@@ -164,8 +194,14 @@ namespace Server.Migrations
                     b.Property<bool>("HasPhoto")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsSubscribed")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("NickName")
                         .HasColumnType("text");
+
+                    b.Property<int>("RebillId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Role")
                         .HasColumnType("integer");

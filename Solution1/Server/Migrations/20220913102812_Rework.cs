@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Server.Migrations
 {
-    public partial class init : Migration
+    public partial class Rework : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -18,7 +18,7 @@ namespace Server.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    MeditationsId = table.Column<List<int>>(type: "integer[]", nullable: false)
+                    MeditationsId = table.Column<List<int>>(type: "integer[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -45,6 +45,21 @@ namespace Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MeditationSubscriptions",
+                columns: table => new
+                {
+                    MeditationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Headers = table.Column<string>(type: "text", nullable: false),
+                    Subscription = table.Column<string>(type: "text", nullable: false),
+                    PayloadText = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MeditationSubscriptions", x => x.MeditationId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
@@ -63,10 +78,11 @@ namespace Server.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false),
                     PaymentDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RecurrentPayment = table.Column<bool>(type: "boolean", nullable: false),
                     Confirm = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -80,7 +96,8 @@ namespace Server.Migrations
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
                     WhenSubscribe = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TimeSubscribe = table.Column<int>(type: "integer", nullable: false)
+                    RemainingTime = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -100,7 +117,9 @@ namespace Server.Migrations
                     Gender = table.Column<int>(type: "integer", nullable: false),
                     Category = table.Column<int>(type: "integer", nullable: false),
                     DateTimeRegistration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    HasPhoto = table.Column<bool>(type: "boolean", nullable: false)
+                    HasPhoto = table.Column<bool>(type: "boolean", nullable: false),
+                    RebillId = table.Column<int>(type: "integer", nullable: false),
+                    IsSubscribed = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -142,6 +161,9 @@ namespace Server.Migrations
         {
             migrationBuilder.DropTable(
                 name: "DMDs");
+
+            migrationBuilder.DropTable(
+                name: "MeditationSubscriptions");
 
             migrationBuilder.DropTable(
                 name: "Notifications");
