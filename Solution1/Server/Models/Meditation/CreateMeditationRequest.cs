@@ -17,8 +17,9 @@ public class CreateMeditationRequest
     public TimeMeditation TimeMeditation { get; set; }
     [Required]
     public CountDayMeditation CountDayMeditation { get; set; }
-    public MeditationSubscription? Subscription { get; set; }
+    [Required]
     public string? Language { get; set; }
+    public MeditationSubscription? Subscription { get; set; }
     public string? SubscriptionPhoto { get; set; }   
     public string? MeditationPhoto { get; set; }
     

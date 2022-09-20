@@ -21,7 +21,7 @@ public class MeditationController : ControllerBase
         int countOfMeditations,
         string? language = "ru",
         bool? getIsNotListened = false,
-        int? meditationId = 0,
+        int? meditationId = null,
         bool? popularToday = false)
     {
         MeditationPreferences? preferences = null;

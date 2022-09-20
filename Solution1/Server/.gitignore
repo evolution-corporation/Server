@@ -43,3 +43,8 @@ obj
 
 # local sqlite db that is auto generated
 LocalDatabase.db
+
+appsettings.json
+Resources
+Migrations
+Resources/Meditation

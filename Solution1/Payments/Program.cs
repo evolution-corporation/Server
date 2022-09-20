@@ -25,9 +25,9 @@ static StandardKernel ConfigureContainer()
 }
 
 static InitResponse InitPayment(TinkoffCredential credential, string userId, bool recurrentPayment, int amount,
-    string orderId)
+    string orderId, HttpClient client)
 {
-    var client = new HttpClient();
+   
     var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/Init");
     var init = new Init(credential.TerminalKey, amount, orderId, recurrentPayment ? 'Y' : 'N', userId);
     message.Content = new StringContent(JsonSerializer.Serialize(init));
@@ -40,9 +40,8 @@ static InitResponse InitPayment(TinkoffCredential credential, string userId, boo
     return response;
 }
 
-static ChargeResponse ChargePayment(TinkoffCredential credential, InitResponse initResponse, int RebillId)
+static ChargeResponse ChargePayment(TinkoffCredential credential, InitResponse initResponse, int RebillId, HttpClient client)
 {
-    var client = new HttpClient();
     var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/Charge");
     var charge = new Charge(credential.TerminalKey, initResponse.PaymentId, RebillId, credential.Password);
     message.Content = new StringContent(JsonSerializer.Serialize(charge));
@@ -72,6 +71,7 @@ while (true)
     var context = container.Get<Context>();
     var subscribes = context.Subscribes;
     var credential = container.Get<TinkoffCredential>();
+    var client = new HttpClient();
     foreach (var subscribe in subscribes)
     {
         var rebillId = context.Users.First(x => x.Id == subscribe.UserId).RebillId;
@@ -84,8 +84,8 @@ while (true)
                 Amount = SubcribeTypeConverter(subscribe.Type)
             };
             var response = InitPayment(credential, subscribe.UserId, false, SubcribeTypeConverter(subscribe.Type),
-                payment.Id);
-            var result = ChargePayment(credential,response,rebillId);
+                payment.Id, client);
+            var result = ChargePayment(credential,response,rebillId, client);
             if (result.Success)
             {
                 context.Payments.Add(payment);
