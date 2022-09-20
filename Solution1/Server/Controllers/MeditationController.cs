@@ -27,17 +27,20 @@ public class MeditationController : ControllerBase
         MeditationPreferences? preferences = null;
         if (type != null || day != null || time != null)
             preferences = new MeditationPreferences { TypeMeditation = type, CountDay = day, Time = time };
-        var token = HttpContext.Request.Headers.Authorization.ToString();
+        string? token;
         if (meditationId != null)
+        {
+            token = HttpContext.Request.Headers.Authorization.ToString();
             return Ok(service.GetById((int)meditationId, token));
+        }
+
         if (preferences != null)
             return Ok(service.GetMeditationByPreferences(preferences));
         if (getIsNotListened != null && (bool)!getIsNotListened)
             return popularToday != null && (bool)popularToday
                 ? Ok(service.GetPopular(language))
                 : Ok(service.GetAllMeditation(language, countOfMeditations));
-        if (token is null)
-            throw new UnauthorizedAccessException();
+        token = HttpContext.Request.Headers.Authorization.ToString();
         return Ok(service.GetNotListened(token, language));
     }
 
