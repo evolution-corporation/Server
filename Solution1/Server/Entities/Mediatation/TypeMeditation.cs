@@ -1,26 +1,24 @@
 ﻿namespace Server.Entities;
 
-public class TypeMeditation
+public enum TypeMeditation
 {
-    public static TypeMeditation Relaxation = new();
-    public static TypeMeditation BreathtakingPractice = new();
-    public static TypeMeditation DirectionalVisualizations = new ();
-    public static TypeMeditation DancePsychotechnics = new();
-    public static TypeMeditation DMD = new();
+    Relaxation ,
+    BreathtakingPractice,
+    DirectionalVisualizations,
+    DancePsychotechnics,
+    DMD
+}
 
-    private TypeMeditation()
-    {
-    }
-
+public static class TypeMeditationConverter {
     public static TypeMeditation? Convert(string? str)
     {
         return str switch
         {
-            "Relaxation" => Relaxation,
-            "BreathtakingPractice" => BreathtakingPractice,
-            "DirectionalVisualizations" => DirectionalVisualizations,
-            "DancePsychotechnics" => DancePsychotechnics,
-            "DMD" => DMD,
+            "Relaxation" => TypeMeditation.Relaxation,
+            "BreathtakingPractice" => TypeMeditation.BreathtakingPractice,
+            "DirectionalVisualizations" => TypeMeditation.DirectionalVisualizations,
+            "DancePsychotechnics" => TypeMeditation.DancePsychotechnics,
+            "DMD" => TypeMeditation.DMD,
             null => null,
             _ => throw new NotImplementedException("We don't have this type of meditation")
         };

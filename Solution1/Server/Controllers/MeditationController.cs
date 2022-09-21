@@ -28,9 +28,9 @@ public class MeditationController : ControllerBase
         if (type != null || day != null || time != null)
             preferences = new MeditationPreferences
             {
-                TypeMeditation = TypeMeditation.Convert(type),
-                CountDay = CountDayMeditation.Convert(day),
-                Time = TimeMeditation.Convert(time)
+                TypeMeditation = TypeMeditationConverter.Convert(type),
+                CountDay = CountDayMeditationConverter.Convert(day),
+                Time = TimeMeditationConverter.Convert(time)
             };
         string? token;
         if (meditationId != null)
