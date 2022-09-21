@@ -26,12 +26,15 @@ public class MeditationController : ControllerBase
     {
         MeditationPreferences? preferences = null;
         if (type != null || day != null || time != null)
+        {
             preferences = new MeditationPreferences
             {
                 TypeMeditation = TypeMeditationConverter.Convert(type),
                 CountDay = CountDayMeditationConverter.Convert(day),
                 Time = TimeMeditationConverter.Convert(time)
             };
+            return Ok(service.GetMeditationByPreferences(preferences));
+        }
         string? token;
         if (meditationId != null)
         {
@@ -39,8 +42,6 @@ public class MeditationController : ControllerBase
             return Ok(service.GetById((int)meditationId, token));
         }
 
-        if (preferences != null)
-            return Ok(service.GetMeditationByPreferences(preferences));
         if (getIsNotListened != null && (bool)!getIsNotListened)
             return popularToday != null && (bool)popularToday
                 ? Ok(service.GetPopular(language))

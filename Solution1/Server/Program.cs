@@ -7,6 +7,7 @@ using Server.Services;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 var builder = WebApplication.CreateBuilder(args);
+var ip = "http://localhost:8000";
 // add services to DI container
 {
     var services = builder.Services;
@@ -73,4 +74,4 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     app.MapHub<AsyncEnumerableHub>("/meditation.audio");
 }
 
-app.Run("http://localhost:8000");
+app.Run(ip);
