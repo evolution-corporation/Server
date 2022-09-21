@@ -130,7 +130,7 @@ public class UserService : IUserService
     private User getUser(string id)
     {
         var query = _context.Users.AsQueryable();
-        var user = query.FirstOrDefault(x => x.Id == id);
+        var user = query.FirstOrDefault(x => x.Id.Equals(id));
         if (user == null) throw new KeyNotFoundException("User not found");
         return user;
     }

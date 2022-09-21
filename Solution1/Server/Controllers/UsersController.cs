@@ -24,17 +24,16 @@ public class UsersController : ControllerBase
     }
     
 
-    [HttpGet("{id}")]
-    public IActionResult GetByIdWithShort(string id,bool? min)
+    [HttpGet]
+    public IActionResult GetByIdWithShort(string? id,bool? min)
     {
-        var token = HttpContext.Request.Headers.Authorization.ToString();
-        if (token.Equals(""))
+        if (id is null)
             return Ok(_userService.GetAll());
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        task.Wait();
-        if (task.Result.Uid != id)
-            throw new AuthenticationException("You try to get user with another id");
-        var user = _userService.GetById(task.Result.Uid);
+        // var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        // task.Wait();
+        // if (task.Result.Uid != id)
+        //     throw new AuthenticationException("You try to get user with another id");
+        var user = _userService.GetById(id);
         return min != null && (bool)min ? Ok($"{user.Id + user.NickName}") : Ok(user);
     }
     
