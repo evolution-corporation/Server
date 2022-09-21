@@ -5,7 +5,7 @@ public enum TypeMeditation
     Relaxation ,
     BreathtakingPractice,
     DirectionalVisualizations,
-    DancePsychotechnics,
+    Basic,
     DMD
 }
 
@@ -14,10 +14,10 @@ public static class TypeMeditationConverter {
     {
         return str switch
         {
-            "Relaxation" => TypeMeditation.Relaxation,
-            "BreathtakingPractice" => TypeMeditation.BreathtakingPractice,
-            "DirectionalVisualizations" => TypeMeditation.DirectionalVisualizations,
-            "DancePsychotechnics" => TypeMeditation.DancePsychotechnics,
+            "relaxation" => TypeMeditation.Relaxation,
+            "breathtakingPractice" => TypeMeditation.BreathtakingPractice,
+            "directionalVisualizations" => TypeMeditation.DirectionalVisualizations,
+            "basic" => TypeMeditation.Basic,
             "DMD" => TypeMeditation.DMD,
             null => null,
             _ => throw new NotImplementedException("We don't have this type of meditation")

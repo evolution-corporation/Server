@@ -7,7 +7,10 @@ using Server.Services;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 var builder = WebApplication.CreateBuilder(args);
-var ip = "http://localhost:8000";
+var ip = "http://*:8000";
+var client = new HttpClient();
+var message = new HttpRequestMessage(HttpMethod.Get, "62.84.125.238:8000/api/204");
+client.Send(message);
 // add services to DI container
 {
     var services = builder.Services;

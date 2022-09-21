@@ -13,9 +13,9 @@ public static class TimeMeditationConverter
     {
         return str switch
         {
-            "LessThan15Minutes" => TimeMeditation.LessThan15Minutes,
-            "MoreThan15AndLessThan60Minutes" => TimeMeditation.MoreThan15AndLessThan60Minutes,
-            "MoreThan60Minutes" => TimeMeditation.MoreThan60Minutes,
+            "lessThan15Minutes" => TimeMeditation.LessThan15Minutes,
+            "moreThan15AndLessThan60Minutes" => TimeMeditation.MoreThan15AndLessThan60Minutes,
+            "moreThan60Minutes" => TimeMeditation.MoreThan60Minutes,
             null => null,
             _ => throw new NotImplementedException("We don't have this Time of meditation")
         };

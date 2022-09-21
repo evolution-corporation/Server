@@ -73,7 +73,6 @@ public class UserService : IUserService
             user.HasPhoto = true;
             //File.WriteAllBytes(resources.UserImage+"/"+user.Id,photo);
         }
-
         _context.Users.Add(user);
         _context.SaveChanges();
         return user;
