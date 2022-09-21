@@ -17,7 +17,7 @@ public class MeditationController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetMeditation(TypeMeditation? type, CountDayMeditation? day, TimeMeditation? time,
+    public IActionResult GetMeditation(string? type, string? day, string? time,
         int countOfMeditations,
         string? language = "ru",
         bool? getIsNotListened = false,
@@ -26,7 +26,12 @@ public class MeditationController : ControllerBase
     {
         MeditationPreferences? preferences = null;
         if (type != null || day != null || time != null)
-            preferences = new MeditationPreferences { TypeMeditation = type, CountDay = day, Time = time };
+            preferences = new MeditationPreferences
+            {
+                TypeMeditation = TypeMeditation.Convert(type),
+                CountDay = CountDayMeditation.Convert(day),
+                Time = TimeMeditation.Convert(time)
+            };
         string? token;
         if (meditationId != null)
         {
