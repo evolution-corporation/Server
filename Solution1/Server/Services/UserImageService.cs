@@ -29,6 +29,6 @@ public class UserImageService : IUserImageService
             throw new ArgumentException("User don't have a photo");
         // var file = File.ReadAllBytes(resources.UserImage + "/" + userId + ".png");
         // var base64 = Convert.ToBase64String(file);
-        return resources.Storage + resources.UserImage + userId;
+        return resources.Storage + "/" + resources.ImageBucket + "/" + resources.UserImage + userId;
     }
 }
