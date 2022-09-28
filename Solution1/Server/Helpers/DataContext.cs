@@ -14,11 +14,10 @@ public class DataContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Meditation> Meditations { get; set; }
     public DbSet<Subscribe> Subscribes { get; set; }
-    public DbSet<Dmd> DMDs { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<UserMeditation> UserMeditations { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-    public DbSet<MeditationSubscription> MeditationSubscriptions { get; set; }
+    public DbSet<Subscription> MeditationSubscriptions { get; set; }
 
     public DataContext(IConfiguration configuration)
     {

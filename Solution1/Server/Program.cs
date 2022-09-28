@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Amazon.S3;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Server.Controllers;
@@ -8,9 +9,6 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 var builder = WebApplication.CreateBuilder(args);
 var ip = "http://*:8000";
-var client = new HttpClient();
-var message = new HttpRequestMessage(HttpMethod.Get, "62.84.125.238:8000/api/204");
-client.Send(message);
 // add services to DI container
 {
     var services = builder.Services;
@@ -29,12 +27,15 @@ client.Send(message);
     var resourceSection = builder.Configuration.GetSection("Resources");
     var resources = new Resources
     {
-        MeditationAudio = resourceSection["MeditationAudio"], MeditationImages = resourceSection["MeditationImages"],
+        Storage = resourceSection["Storage"],
+        ImageBucket = resourceSection["ImageBucket"],
+        AudioBucket = resourceSection["AudioBucket"],
+        SubscriptionImages = resourceSection["SubscriptionImages"], 
+        MeditationImages = resourceSection["MeditationImages"],
         UserImage = resourceSection["UserImage"]
     };
     services.AddSingleton(_ => resources);
     //services.Configure<Resources>(builder.Configuration.GetSection("Resources"));
-    //TODO: Перделать Tinkoff Credential на прямую загрузку из appsettings.json
     var str = builder.Configuration["TinkoffCredential"];
     var credential = (TinkoffCredential)JsonSerializer.Deserialize(str, typeof(TinkoffCredential))!;
     if (credential == null)
@@ -48,10 +49,14 @@ client.Send(message);
     services.AddScoped<IMeditationService, MeditationService>();
     services.AddScoped<ISubscribeService, SubscribeService>();
     services.AddScoped<IPaymentService, PaymentService>();
-    services.AddScoped<IDmdService, DmdService>();
     services.AddScoped<IMeditationImageService, MeditationImageService>();
     services.AddScoped<INotificationService, NotificationService>();
     services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
+    services.AddScoped<IMeditationAudioService, MeditationAudioService>();
+    var xyu = new AmazonS3Client(new AmazonS3Config() { ServiceURL = "https://s3.yandexcloud.net" });
+    var task = xyu.GetBucketVersioningAsync(resources.UserImage);
+    task.Wait();
+    services.AddSingleton(_ => xyu);
     services.AddScoped<Notificator>();
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
@@ -62,6 +67,7 @@ client.Send(message);
     });
 }
 var app = builder.Build();
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 {
     // global cors policy
@@ -74,7 +80,6 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     app.UseMiddleware<ErrorHandlerMiddleware>();
 
     app.MapControllers();
-    app.MapHub<AsyncEnumerableHub>("/meditation.audio");
 }
 
 app.Run(ip);

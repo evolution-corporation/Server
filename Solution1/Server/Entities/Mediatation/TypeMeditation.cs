@@ -6,7 +6,7 @@ public enum TypeMeditation
     BreathtakingPractice,
     DirectionalVisualizations,
     Basic,
-    DMD
+    Set
 }
 
 public static class TypeMeditationConverter {
@@ -18,7 +18,7 @@ public static class TypeMeditationConverter {
             "breathtakingPractice" => TypeMeditation.BreathtakingPractice,
             "directionalVisualizations" => TypeMeditation.DirectionalVisualizations,
             "basic" => TypeMeditation.Basic,
-            "DMD" => TypeMeditation.DMD,
+            "set" => TypeMeditation.Set,
             null => null,
             _ => throw new NotImplementedException("We don't have this type of meditation")
         };

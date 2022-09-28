@@ -2,8 +2,10 @@
 
 public class Resources
 {
-    public string MeditationAudio { get; set; }
+    public string Storage { get; set; }
+    public string ImageBucket { get; set; }
+    public string AudioBucket { get; set; }
     public string MeditationImages { get; set; }
-    public string MeditationSubscribtionImage { get; set; }
+    public string SubscriptionImages { get; set; }
     public string UserImage { get; set; }
 }

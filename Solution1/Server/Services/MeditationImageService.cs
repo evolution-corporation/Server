@@ -18,10 +18,5 @@ public class MeditationImageService : IMeditationImageService
         this.resources = resources;
     }
 
-    public string GetMeditationImage(int id)
-    {
-        var file = File.ReadAllBytes(resources.MeditationImages + "/" + id + ".k");
-        var str = Convert.ToBase64String(file);
-        return str;
-    }
+    public string GetMeditationImage(int id) => resources.Storage + resources.MeditationImages + id;
 }

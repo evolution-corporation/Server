@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using AutoMapper;
 using FirebaseAdmin.Auth;
 using Server.Entities;
 using Server.Helpers;
@@ -25,12 +27,14 @@ public class MeditationService : IMeditationService
     private readonly DataContext context;
     private readonly IMapper mapper;
     private readonly Resources resources;
+    private readonly AmazonS3Client s3;
 
-    public MeditationService(DataContext context, IMapper mapper, Resources resources)
+    public MeditationService(DataContext context, IMapper mapper, Resources resources, AmazonS3Client s3)
     {
         this.context = context;
         this.mapper = mapper;
         this.resources = resources;
+        this.s3 = s3;
     }
 
     public object GetById(int id, string token)
@@ -91,19 +95,14 @@ public class MeditationService : IMeditationService
         if (model.SubscriptionPhoto != null)
         {
             var photo = Convert.FromBase64String(model.SubscriptionPhoto);
-            var file = new FileStream(resources.MeditationSubscribtionImage + "/" + meditation.id, FileMode.Create);
-            file.Write(photo, 0, photo.Length);
-            file.Close();
+            WriteSubscptionImage(photo,meditation.id);
         }
 
         if (model.MeditationPhoto != null)
         {
             var photo = Convert.FromBase64String(model.MeditationPhoto);
-            var file = new FileStream(resources.UserImage + "/" + meditation.id, FileMode.Create);
-            file.Write(photo, 0, photo.Length);
-            file.Close();
+            WriteMeditationImage(photo,meditation.id);
         }
-
         if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
         context.Meditations.Add(meditation);
         context.SaveChangesAsync();
@@ -117,5 +116,31 @@ public class MeditationService : IMeditationService
         mapper.Map(model, meditation);
         context.Meditations.Update(meditation);
         context.SaveChangesAsync();
+    }
+    
+    private void WriteMeditationImage(byte[] photo, int meditationId)
+    {
+        var ms = new MemoryStream(photo);
+        var req = new PutObjectRequest
+        {
+            BucketName = resources.ImageBucket,
+            Key = resources.MeditationImages + meditationId,
+            InputStream = ms
+        };
+        var task = s3.PutObjectAsync(req);
+        task.Wait();
+    }
+
+    private void WriteSubscptionImage(byte[] photo,int meditationId)
+    {
+        var ms = new MemoryStream(photo);
+        var req = new PutObjectRequest
+        {
+            BucketName = resources.ImageBucket,
+            Key = resources.MeditationImages + meditationId,
+            InputStream = ms
+        };
+        var task = s3.PutObjectAsync(req);
+        task.Wait();
     }
 }

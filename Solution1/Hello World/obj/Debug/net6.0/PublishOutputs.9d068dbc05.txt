@@ -1,0 +1,5 @@
+D:\Govno_code\работа\EvolutionServer\Solution1\Hello World\bin\Debug\net6.0\publish\Hello World.exe
+D:\Govno_code\работа\EvolutionServer\Solution1\Hello World\bin\Debug\net6.0\publish\Hello World.dll
+D:\Govno_code\работа\EvolutionServer\Solution1\Hello World\bin\Debug\net6.0\publish\Hello World.deps.json
+D:\Govno_code\работа\EvolutionServer\Solution1\Hello World\bin\Debug\net6.0\publish\Hello World.runtimeconfig.json
+D:\Govno_code\работа\EvolutionServer\Solution1\Hello World\bin\Debug\net6.0\publish\Hello World.pdb

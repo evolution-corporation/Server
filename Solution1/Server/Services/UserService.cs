@@ -1,3 +1,5 @@
+using Amazon.S3;
+using Amazon.S3.Model;
 using FirebaseAdmin.Auth;
 
 namespace Server.Services;
@@ -22,15 +24,18 @@ public class UserService : IUserService
     private DataContext _context;
     private readonly IMapper _mapper;
     private readonly Resources resources;
+    private readonly AmazonS3Client s3;
 
     public UserService(
         DataContext context,
         IMapper mapper,
-        Resources resources)
+        Resources resources,
+        AmazonS3Client s3)
     {
         _context = context;
         _mapper = mapper;
         this.resources = resources;
+        this.s3 = s3;
     }
 
     public IEnumerable<User> GetAll()
@@ -67,12 +72,10 @@ public class UserService : IUserService
         if (model.Photo != null)
         {
             var photo = Convert.FromBase64String(model.Photo);
-            var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
-            file.Write(photo, 0, photo.Length);
-            file.Close();
+            WriteObject(photo, user.Id);
             user.HasPhoto = true;
-            //File.WriteAllBytes(resources.UserImage+"/"+user.Id,photo);
         }
+
         _context.Users.Add(user);
         _context.SaveChanges();
         return user;
@@ -101,14 +104,11 @@ public class UserService : IUserService
                                        + string.Join(",", GenerateUserNickname(model.NickName)));
         if (model.Image != null)
         {
-            if (user.HasPhoto) File.Delete(resources.UserImage + "/" + user.Id);
+            if (user.HasPhoto) DeleteObject(user.Id);;
             var photo = Convert.FromBase64String(model.Image);
-            var file = new FileStream(resources.UserImage + "/" + user.Id, FileMode.Create);
-            file.Write(photo, 0, photo.Length);
-            file.Close();
+            WriteObject(photo,user.Id);
             user.HasPhoto = true;
         }
-
         _mapper.Map(model, user);
         _context.Users.Update(user);
         _context.SaveChanges();
@@ -140,5 +140,29 @@ public class UserService : IUserService
         var rnd = new Random();
         for (var i = 0; i < 5; i++) list.Add(nickname + rnd.Next());
         return list.ToArray();
+    }
+
+    private void WriteObject(byte[] photo, string userId)
+    {
+        var ms = new MemoryStream(photo);
+        var req = new PutObjectRequest
+        {
+            BucketName = resources.ImageBucket,
+            Key = resources.UserImage + userId,
+            InputStream = ms
+        };
+        var task = s3.PutObjectAsync(req);
+        task.Wait();
+    }
+
+    private void DeleteObject(string userId)
+    {
+        var req = new DeleteObjectRequest
+        {
+            BucketName = resources.ImageBucket,
+            Key = resources.UserImage + userId
+        };
+        var task = s3.DeleteObjectAsync(req);
+        task.Wait();
     }
 }
