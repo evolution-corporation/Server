@@ -54,7 +54,7 @@ var ip = "http://*:8000";
     services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
     services.AddScoped<IMeditationAudioService, MeditationAudioService>();
     var xyu = new AmazonS3Client(new AmazonS3Config() { ServiceURL = "https://s3.yandexcloud.net" });
-    var task = xyu.GetBucketVersioningAsync(resources.UserImage);
+    var task = xyu.GetBucketVersioningAsync(resources.ImageBucket);
     task.Wait();
     services.AddSingleton(_ => xyu);
     services.AddScoped<Notificator>();
