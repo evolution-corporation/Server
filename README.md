@@ -129,7 +129,7 @@ Documentation at https://jasonwatmore.com/post/2022/03/15/net-6-crud-api-example
 | Status      |    string    |     нет     | Текстовое сообщение в профиле пользователя        |
 | Gender      |  UserGender  |     нет     | Пол пользователя                                  |
 | Category    | UserCategory |     нет     | Категория пользователя                            |
-| Photo       |    base64    |     нет     | Изображение пользователя                          |
+| Image       |    base64    |     нет     | Изображение пользователя                          |
 | DisplayName |    string    |     нет     | Имя пользователя которое будет везде отображаться |
 | ExpoToken   |    string    |     нет     | Токен для отправки push-уведомлений через Expo    |
 
@@ -263,12 +263,11 @@ Documentation at https://jasonwatmore.com/post/2022/03/15/net-6-crud-api-example
 
 | Название       |      Тип       | Обязательно | Описание                                       |
 |----------------|:--------------:|:-----------:|:-----------------------------------------------|
-| name           |     string     |     да      | Название медитации                             |
-| description    |     string     |     да      | Описание медитации                             |
-| image          |     base64     |     да      | изображение медитации                          |
+| Name           |     string     |     да      | Название медитации                             |
+| Description    |     string     |     да      | Описание медитации                             |
+| Image          |     base64     |     да      | изображение медитации                          |
 | TypeMeditation | TypeMeditation |     да      | Тип медитации                                  |
-| audio          |     base64     |     да      | Аудио запись медитации                         |
-| isSubscribe    |    boolean     |     нет     | Чтобы прослушать медитацию необходима подписка |
+| IsSubscribe    |    boolean     |     нет     | Чтобы прослушать медитацию необходима подписка |
 
 - **PATCH** Требует авторизации.
   > Обновляет данные об медитации в системе, если он найден.
@@ -283,11 +282,11 @@ Documentation at https://jasonwatmore.com/post/2022/03/15/net-6-crud-api-example
 
 | Название       |      Тип       | Обязательно | Описание                                       |
 |----------------|:--------------:|:-----------:|:-----------------------------------------------|
-| name           |     string     |     да      | Название медитации                             |
-| description    |     string     |     да      | Описание медитации                             |
-| image          |     base64     |     да      | изображение медитации                          |
+| Name           |     string     |     да      | Название медитации                             |
+| Description    |     string     |     да      | Описание медитации                             |
+| Image          |     base64     |     да      | изображение медитации                          |
 | TypeMeditation | TypeMeditation |     да      | Тип медитации                                  |
-| isSubscribe    |    boolean     |     нет     | Чтобы прослушать медитацию необходима подписка |
+| IsSubscribe    |    boolean     |     нет     | Чтобы прослушать медитацию необходима подписка |
 
 ### /meditation.audio
 
