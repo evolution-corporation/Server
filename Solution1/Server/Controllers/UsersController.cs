@@ -9,7 +9,7 @@ using Models.Users;
 using Services;
 
 [ApiController]
-[Route("/Users")]
+[Route("/users")]
 public class UsersController : ControllerBase
 {
     private IUserService _userService;

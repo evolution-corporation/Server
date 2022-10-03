@@ -69,9 +69,10 @@ public class UserService : IUserService
             user.Id = task.Result.Uid;
         }
 
-        if (model.Photo != null)
+        if (model.Image != null)
         {
-            var photo = Convert.FromBase64String(model.Photo);
+            Console.WriteLine(model.Image);
+            var photo = Convert.FromBase64String(model.Image);
             WriteObject(photo, user.Id);
             user.HasPhoto = true;
         }

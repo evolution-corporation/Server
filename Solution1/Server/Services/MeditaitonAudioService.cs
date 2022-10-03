@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 using System.Threading.Channels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -13,7 +14,7 @@ namespace Server.Controllers;
 
 public interface IMeditationAudioService
 {
-    public string? GetMeditationAudioUrl(int meditationId);
+    public string? GetMeditationAudioUrl(int meditationId, string userToken);
 }
 
 public class MeditationAudioService: IMeditationAudioService
@@ -24,8 +25,18 @@ public class MeditationAudioService: IMeditationAudioService
         this.context = context;
     }
 
-    public string? GetMeditationAudioUrl(int meditationId)
+    public string? GetMeditationAudioUrl(int meditationId, string userId)
     {
-        return context.Meditations.AsQueryable().First(x => x.id == meditationId).AudioUrl;
+        var user = context.Users.AsQueryable().First(x => x.Id == userId);
+        var meditation = context.Meditations.AsQueryable().First(x => x.id == meditationId);
+        if(meditation.IsSubscribed)
+        {
+            if(user.IsSubscribed)
+            {
+                return meditation.AudioUrl;
+            }
+            throw new AuthenticationException("Попытка получения медитации без подписки");
+        }
+        return meditation.AudioUrl;
     }
 }

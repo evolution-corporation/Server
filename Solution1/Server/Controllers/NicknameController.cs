@@ -4,7 +4,7 @@ using Server.Services;
 namespace Server.Controllers;
 
 [ApiController]
-[Route("nickname")]
+[Route("/nickname")]
 public class NicknameController: ControllerBase
 {
     private INicknameService _service;

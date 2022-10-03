@@ -15,8 +15,9 @@ public class NotificationController: ControllerBase
     }
 
     [HttpPut]
-    public IActionResult SubUser(string token, string expoToken, int frequency)
+    public IActionResult SubUser(string expoToken, int frequency)
     {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
         service.SubUserNotification(token,expoToken,frequency);
         return Ok();
     }
