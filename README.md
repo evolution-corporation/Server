@@ -16,7 +16,6 @@ Documentation at https://jasonwatmore.com/post/2022/03/15/net-6-crud-api-example
     - /users
     - /authentication
     - /user.image
-    - /subscribe
     - /nickname
     - /user.image
     - /subnotification
