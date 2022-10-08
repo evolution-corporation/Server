@@ -1,3 +1,4 @@
+using System.Security.Authentication;
 using Amazon.S3;
 using Amazon.S3.Model;
 using FirebaseAdmin.Auth;
@@ -14,15 +15,14 @@ public interface IUserService
     IEnumerable<User> GetAll();
     User GetById(string id);
     User Create(CreateUserRequest model, string token);
-    void Update(string id, UpdateUserRequest model);
+    void Update(string adminId, UpdateUserRequest model, string userId);
     User UpdateByUser(string token, UpdateUserRequest model);
-    public void UserListened(string token, int meditationId);
 }
 
 public class UserService : IUserService
 {
-    private DataContext _context;
-    private readonly IMapper _mapper;
+    private readonly DataContext context;
+    private readonly IMapper mapper;
     private readonly Resources resources;
     private readonly AmazonS3Client s3;
 
@@ -32,33 +32,32 @@ public class UserService : IUserService
         Resources resources,
         AmazonS3Client s3)
     {
-        _context = context;
-        _mapper = mapper;
+        this.context = context;
+        this.mapper = mapper;
         this.resources = resources;
         this.s3 = s3;
     }
 
     public IEnumerable<User> GetAll()
     {
-        return _context.Users;
+        return context.Users;
     }
 
     public User GetById(string id)
     {
-        return getUser(id);
+        return GetUser(id);
     }
 
     public User Create(CreateUserRequest model, string token)
     {
         // validate
-        if (_context.Users.Any(x => x.NickName == model.NickName))
+        if (context.Users.Any(x => x.NickName == model.NickName))
             throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
                                    + GenerateUserNickname(model.NickName));
         if (model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()) ||
-            model.Status != null && ContentFilter.ContainsAbsentWord(model.Status.Split()) ||
             model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()))
             throw new AppException("Here is bad word");
-        var user = _mapper.Map<User>(model);
+        var user = mapper.Map<User>(model);
 
         if (token.Equals("test"))
             user.Id = new Random().Next().ToString();
@@ -77,65 +76,58 @@ public class UserService : IUserService
             user.HasPhoto = true;
         }
 
-        _context.Users.Add(user);
-        _context.SaveChanges();
+        user.UserMeditations = new List<UserMeditation>();
+        context.Users.Add(user);
+        context.SaveChanges();
         return user;
     }
 
-    public void Update(string id, UpdateUserRequest model)
+    public void Update(string adminId, UpdateUserRequest model, string userId)
     {
-        var user = getUser(id);
-
+        var admin = GetUser(adminId);
+        if (admin.Role != Role.ADMIN)
+            throw new AuthenticationException("You don't have permission");
+        var user = GetUser(userId);
         // copy model to user and save
-        _mapper.Map(model, user);
-        _context.Users.Update(user);
-        _context.SaveChanges();
+        mapper.Map(model, user);
+        context.Users.Update(user);
+        context.SaveChanges();
     }
 
     public User UpdateByUser(string token, UpdateUserRequest model)
     {
-        var query = _context.Users.AsQueryable();
+        var query = context.Users.AsQueryable();
         var uid = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
         var user = query.First(x => x.Id == uid);
         if (user == null)
             throw new AppException("User with token" + token + "not found");
         if (model.NickName != null)
-            if (_context.Users.Any(x => x.NickName == model.NickName))
+            if (context.Users.Any(x => x.NickName == model.NickName))
                 throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
                                        + string.Join(",", GenerateUserNickname(model.NickName)));
         if (model.Image != null)
         {
-            if (user.HasPhoto) DeleteObject(user.Id);;
+            if (user.HasPhoto) DeleteObject(user.Id);
             var photo = Convert.FromBase64String(model.Image);
-            WriteObject(photo,user.Id);
+            WriteObject(photo, user.Id);
             user.HasPhoto = true;
         }
-        _mapper.Map(model, user);
-        _context.Users.Update(user);
-        _context.SaveChanges();
+
+        mapper.Map(model, user);
+        context.Users.Update(user);
+        context.SaveChanges();
         return user;
     }
-
-    public void UserListened(string token, int meditationId)
+    
+    private User GetUser(string id)
     {
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        task.Wait();
-        var uid = task.Result.Uid;
-        var n = new UserMeditation(uid, meditationId, DateTime.Today);
-        if (!_context.UserMeditations.Contains(n))
-            _context.UserMeditations.Add(n);
-        _context.SaveChanges();
-    }
-
-    private User getUser(string id)
-    {
-        var query = _context.Users.AsQueryable();
+        var query = context.Users.AsQueryable();
         var user = query.FirstOrDefault(x => x.Id.Equals(id));
         if (user == null) throw new KeyNotFoundException("User not found");
         return user;
     }
 
-    private string[] GenerateUserNickname(string nickname)
+    private static string[] GenerateUserNickname(string nickname)
     {
         var list = new List<string>();
         var rnd = new Random();

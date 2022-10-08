@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Amazon.S3;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -8,7 +9,7 @@ using Server.Services;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 var builder = WebApplication.CreateBuilder(args);
-var ip = "http://*:8000";
+var ip = "http://localhost:8000";
 // add services to DI container
 {
     var services = builder.Services;
@@ -17,10 +18,13 @@ var ip = "http://*:8000";
     services.AddCors();
     services.AddControllers().AddJsonOptions(x =>
     {
-        // serialize enums as strings in api responses (e.g. Role)
+        // var stockConverterOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        // stockConverterOptions.Converters.Add(new JsonStringEnumConverter());
+        // var stockConverter = new TestSerializer(stockConverterOptions);
+        // x.JsonSerializerOptions.Converters.Add(stockConverter);
+        // // serialize enums as strings in api responses (e.g. Role)
         x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-
-        // ignore omitted parameters on models to enable optional params (e.g. User update)
+        //ignore omitted parameters on models to enable optional params (e.g. User update)
         x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
     services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -53,9 +57,10 @@ var ip = "http://*:8000";
     services.AddScoped<INotificationService, NotificationService>();
     services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
     services.AddScoped<IMeditationAudioService, MeditationAudioService>();
-    var xyu = new AmazonS3Client(new AmazonS3Config() { ServiceURL = "https://s3.yandexcloud.net" });
-    var task = xyu.GetBucketVersioningAsync(resources.ImageBucket);
-    task.Wait();
+    services.AddScoped<ISubscribeService, SubscribeService>();
+    var xyu = new AmazonS3Client(new AmazonS3Config() { ServiceURL = "https://s3.yandexcloud.net" });   
+    //var task = xyu.GetBucketVersioningAsync(resources.ImageBucket);
+    //task.Wait();
     services.AddSingleton(_ => xyu);
     services.AddScoped<Notificator>();
     services.AddSignalR();

@@ -21,16 +21,15 @@ public class MeditationController : ControllerBase
         int countOfMeditations,
         string? language = "ru",
         bool? getIsNotListened = false,
-        int? meditationId = null,
+        Guid? meditationId = null,
         bool? popularToday = false)
     {
-        MeditationPreferences? preferences = null;
+        MeditationPreferences? preferences;
         if (type != null || day != null || time != null)
         {
             preferences = new MeditationPreferences
             {
                 TypeMeditation = TypeMeditationConverter.Convert(type),
-                CountDay = CountDayMeditationConverter.Convert(day),
                 Time = TimeMeditationConverter.Convert(time)
             };
             return Ok(service.GetMeditationByPreferences(preferences));
@@ -39,7 +38,7 @@ public class MeditationController : ControllerBase
         if (meditationId != null)
         {
             token = HttpContext.Request.Headers.Authorization.ToString();
-            return Ok(service.GetById((int)meditationId, token));
+            return Ok(service.GetById((Guid)meditationId, token));
         }
 
         if (getIsNotListened != null && (bool)!getIsNotListened)
@@ -49,16 +48,25 @@ public class MeditationController : ControllerBase
         token = HttpContext.Request.Headers.Authorization.ToString();
         return Ok(service.GetNotListened(token, language));
     }
+    
+    [HttpPut]
+    public IActionResult AddMeditation(Guid meditationId)
+    {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
+        service.UserListened(token, meditationId);
+        return Ok();
+    }
 
     [HttpPost]
     public IActionResult AddMeditation(CreateMeditationRequest model)
     {
-        service.Create(model);
+        var token = HttpContext.Request.Headers.Authorization.ToString();
+        service.Create(model, token);
         return Ok(new { message = "Meditation created" });
     }
 
     [HttpPatch]
-    public IActionResult UpdateMeditation(int id, UpdateMeditationRequest model)
+    public IActionResult UpdateMeditation(Guid id, UpdateMeditationRequest model)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
         service.Update(model, id, token);

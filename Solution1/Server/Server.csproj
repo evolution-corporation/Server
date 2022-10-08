@@ -29,6 +29,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Expo\Expo.csproj" />
+      <ProjectReference Include="..\Payments\Payments.csproj" />
     </ItemGroup>
 
 </Project>

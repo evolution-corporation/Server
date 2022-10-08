@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using System.Security.Authentication;
+using Amazon.S3;
 using Amazon.S3.Model;
 using AutoMapper;
 using FirebaseAdmin.Auth;
@@ -10,16 +11,17 @@ namespace Server.Services;
 
 public interface IMeditationService
 {
-    public object GetById(int id, string token);
+    public object GetById(Guid id, string token);
     public object GetAllMeditation(string language, int countOfMeditations);
     public IEnumerable<Meditation> GetNotListened(string token, string language);
     public Meditation GetPopular(string language);
 
-    public void Create(CreateMeditationRequest model);
+    public void Create(CreateMeditationRequest model, string token);
 
-    public void Update(UpdateMeditationRequest model, int id, string token);
+    public void Update(UpdateMeditationRequest model, Guid id, string token);
 
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences);
+    public void UserListened(string token, Guid meditationId);
 }
 
 public class MeditationService : IMeditationService
@@ -37,7 +39,7 @@ public class MeditationService : IMeditationService
         this.s3 = s3;
     }
 
-    public object GetById(int id, string token)
+    public object GetById(Guid id, string token)
     {
         var userId = context.GetUserId(token);
         var sub = context.Users.AsQueryable().First(x => x.Id == userId).IsSubscribed || token.Equals("test");
@@ -51,7 +53,6 @@ public class MeditationService : IMeditationService
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences)
     {
         return context.Meditations.AsQueryable().Where(x =>
-                (preferences.CountDay == null || x.CountDay == preferences.CountDay) &&
                 (preferences.Time == null || x.Time == preferences.Time) &&
                 (preferences.TypeMeditation == null || preferences.TypeMeditation == x.TypeMeditation))
             .ToArray();
@@ -89,8 +90,14 @@ public class MeditationService : IMeditationService
         return query.First(x => x.UserMeditations.Count == max && x.Language == language);
     }
 
-    public void Create(CreateMeditationRequest model)
+    public void Create(CreateMeditationRequest model, string token)
     {
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var userId = task.Result.Uid;
+        var user = context.Users.First(x => x.Id == userId);
+        if (user.Role != Role.ADMIN)
+            throw new AuthenticationException("You don't have permision");
         var meditation = mapper.Map<Meditation>(model);
         if (model.SubscriptionPhoto != null)
         {
@@ -104,11 +111,12 @@ public class MeditationService : IMeditationService
             WriteMeditationImage(photo,meditation.id);
         }
         if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
+        meditation.UserMeditations = new List<UserMeditation>();
         context.Meditations.Add(meditation);
         context.SaveChangesAsync();
     }
 
-    public void Update(UpdateMeditationRequest model, int id, string token)
+    public void Update(UpdateMeditationRequest model, Guid id, string token)
     {
         FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         var query = context.Meditations.AsQueryable();
@@ -118,7 +126,19 @@ public class MeditationService : IMeditationService
         context.SaveChangesAsync();
     }
     
-    private void WriteMeditationImage(byte[] photo, int meditationId)
+    public void UserListened(string token, Guid meditationId)
+    {
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var uid = task.Result.Uid;
+        var n = new UserMeditation(uid, meditationId, DateTime.Today);
+        if (!context.UserMeditations.Contains(n))
+            context.UserMeditations.Add(n);
+        context.SaveChanges();
+    }
+    
+    //TODO: Переделать на запись в папку по языку
+    private void WriteMeditationImage(byte[] photo, Guid meditationId)
     {
         var ms = new MemoryStream(photo);
         var req = new PutObjectRequest
@@ -131,13 +151,13 @@ public class MeditationService : IMeditationService
         task.Wait();
     }
 
-    private void WriteSubscptionImage(byte[] photo,int meditationId)
+    private void WriteSubscptionImage(byte[] photo,Guid meditationId)
     {
         var ms = new MemoryStream(photo);
         var req = new PutObjectRequest
         {
             BucketName = resources.ImageBucket,
-            Key = resources.MeditationImages + meditationId,
+            Key = resources.SubscriptionImages + meditationId,
             InputStream = ms
         };
         var task = s3.PutObjectAsync(req);

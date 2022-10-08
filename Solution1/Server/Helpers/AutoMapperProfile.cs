@@ -23,8 +23,6 @@ public class AutoMapperProfile : Profile
                     if (prop is string arg3 && string.IsNullOrEmpty(arg3)) return false;
 
                     // ignore null role
-                    if (x.DestinationMember.Name == "Role" && src.Role == null) return false;
-
                     return true;
                 }
             ));

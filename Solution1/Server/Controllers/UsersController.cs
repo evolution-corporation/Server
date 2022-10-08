@@ -41,22 +41,15 @@ public class UsersController : ControllerBase
         var user = _userService.Create(model, token);
         return Ok(user);
     }
-
+    
     [HttpPut]
-    public IActionResult Update(string token, UpdateUserRequest model)
-    {
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        task.Wait();
-        _userService.Update(task.Result.Uid, model);
-        return Ok(new { message = "User updated" });
-    }
-
-    [HttpPut]
-    public IActionResult AddMeditation(int meditationId)
+    public IActionResult Update( UpdateUserRequest model, string userId)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
-        _userService.UserListened(token, meditationId);
-        return Ok();
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        _userService.Update(task.Result.Uid, model, userId);
+        return Ok(new { message = "User updated" });
     }
 
     [HttpPatch]

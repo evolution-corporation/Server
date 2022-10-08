@@ -18,7 +18,7 @@ public class CreateMeditationRequest
     [Required]
     public CountDayMeditation CountDayMeditation { get; set; }
     [Required]
-    public string? Language { get; set; }
+    public Dictionary<string,string>? Language { get; set; }
     public Subscription? Subscription { get; set; }
     public string? SubscriptionPhoto { get; set; }   
     public string? MeditationPhoto { get; set; }

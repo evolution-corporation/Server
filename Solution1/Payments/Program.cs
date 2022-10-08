@@ -4,16 +4,17 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Ninject;
 using Payments;
-using Server.Entities;
-using Server.Entities.Payment;
-using Server.Helpers;
+using Payments.Entities.Payment;
+using Payments.Entities.Subscribe;
 
 static StandardKernel ConfigureContainer()
 {
     var container = new StandardKernel();
     container.Bind<Context>().To<Context>();
+    var conf = new Configuration();
     var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional: false);
     IConfiguration configuration = builder.Build();
@@ -74,7 +75,7 @@ while (true)
     var client = new HttpClient();
     foreach (var subscribe in subscribes)
     {
-        var rebillId = context.Users.First(x => x.Id == subscribe.UserId).RebillId;
+        var rebillId = subscribe.RebillId;
         if (rebillId == -1) 
             continue;
         if (subscribe.RemainingTime == 1)

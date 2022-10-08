@@ -14,29 +14,33 @@ namespace Server.Controllers;
 
 public interface IMeditationAudioService
 {
-    public string? GetMeditationAudioUrl(int meditationId, string userToken);
+    public string? GetMeditationAudioUrl(Guid meditationId, string userToken);
 }
 
-public class MeditationAudioService: IMeditationAudioService
+public class MeditationAudioService : IMeditationAudioService
 {
     private DataContext context;
-    public MeditationAudioService(DataContext context)
+    private readonly Resources resources;
+
+    public MeditationAudioService(DataContext context, Resources resources)
     {
         this.context = context;
+        this.resources = resources;
     }
 
-    public string? GetMeditationAudioUrl(int meditationId, string userId)
+    public string? GetMeditationAudioUrl(Guid meditationId, string userId)
     {
         var user = context.Users.AsQueryable().First(x => x.Id == userId);
         var meditation = context.Meditations.AsQueryable().First(x => x.id == meditationId);
-        if(meditation.IsSubscribed)
+        if (meditation.IsSubscribed)
         {
-            if(user.IsSubscribed)
+            if (user.IsSubscribed)
             {
-                return meditation.AudioUrl;
+                return resources.Storage + resources.AudioBucket + meditation.Language + meditation.id;
+                // return meditation.AudioUrl;
             }
             throw new AuthenticationException("Попытка получения медитации без подписки");
         }
-        return meditation.AudioUrl;
+        return resources.Storage + resources.AudioBucket + meditation.Language + meditation.id;
     }
 }

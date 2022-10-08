@@ -23,7 +23,7 @@ public class TinkoffNotificationService : ITinkoffNotificationService
         if (!notification.Success) return;
         payment.Confirm = true;
         if (payment.RecurrentPayment) 
-            context.Users.First(x => x.Id == payment.UserId).RebillId = notification.RebillId;
+            context.Subscribes.First(x => x.UserId == payment.UserId).RebillId = notification.RebillId;
         context.SaveChanges();
     }
 }

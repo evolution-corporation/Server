@@ -8,10 +8,9 @@ namespace Server.Services;
 
 public interface ISubscribeService
 {
-   public void SubscribeUser(string token, int timeSubscribe);
 
-   public void UnsubscribeUser(string token);
    public Subscribe GetUserSubscribe(string token);
+   public Subscribe GetUserSubscribeByAdmin(string userId, string token);
 }
 
 public class SubscribeService: ISubscribeService
@@ -22,34 +21,24 @@ public class SubscribeService: ISubscribeService
    {
       this.context = context;
    }
-   //TODO: перенести подписку пользователя с клиента на сервер.
-   public void SubscribeUser(string token, int timeSubscribe)
-   {
-      var userId = context.GetUserId(token);
-      if (context.Payments.FirstOrDefault(x => x.UserId == userId) == null)
-         throw new AuthenticationException("Subscription not paid");
 
-      var oldSub = context.Subscribes.First(x => x.UserId == userId);
-      // var sub = new Subscribe
-      // {
-      //    UserId = userId,
-      //    WhenSubscribe = DateTime.Now,
-      //    RemainingTime = timeSubscribe + oldSub.RemainingTime
-      // };
-      context.Subscribes.Remove(oldSub);
-      //context.Subscribes.Add(sub);
-      context.SaveChanges();
-   }
-
-   public Subscribe GetUserSubscribe(string id)
+   public Subscribe GetUserSubscribe(string token)
    {
+      var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+      task.Wait();
+      var id = task.Result.Uid;
       return context.Subscribes.AsQueryable().First(x => x.UserId == id);
    }
 
-   public void UnsubscribeUser(string token)
+   public Subscribe GetUserSubscribeByAdmin(string userId, string token)
    {
-      var userId = context.GetUserId(token);
-      context.Subscribes.Remove(context.Subscribes.AsQueryable().First(x => x.UserId == userId));
-      context.SaveChanges();
+      var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+      task.Wait();
+      var admin = context.Users.First(x => x.Id == task.Result.Uid);
+      if (admin.Role != Role.ADMIN)
+      {
+         throw new AuthenticationException("You don't have permission");
+      }
+      return context.Subscribes.AsQueryable().First(x => x.UserId == userId);
    }
 }

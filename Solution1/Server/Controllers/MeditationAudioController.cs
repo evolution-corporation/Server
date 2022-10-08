@@ -13,8 +13,8 @@ public class MeditationAudioController: ControllerBase
         this.service = service;
     }
 
-    [HttpGet("{meditationId:int}")]
-    public IActionResult GetAudioUrl(int meditationId)
+    [HttpGet("{meditationId:Guid}")]
+    public IActionResult GetAudioUrl(Guid meditationId)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
         return Ok(service.GetMeditationAudioUrl(meditationId,token));

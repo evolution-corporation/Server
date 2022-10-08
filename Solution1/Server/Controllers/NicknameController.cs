@@ -17,6 +17,6 @@ public class NicknameController: ControllerBase
         var user = _service.GetUserByNickname(nickname);
         if (user == null)
             return NotFound();
-        return isMinimumData ? Ok($"{user.NickName + user.Birthday + user.Category}") : Ok(user);
+        return isMinimumData ? Ok($"{user.NickName + user.Birthday}") : Ok(user);
     }
 }

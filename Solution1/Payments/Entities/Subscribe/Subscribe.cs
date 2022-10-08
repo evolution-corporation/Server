@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Server.Entities;
+namespace Payments.Entities.Subscribe;
 
 public class Subscribe
 {
