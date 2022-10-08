@@ -4,7 +4,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
 using Ninject;
 using Payments;
 using Payments.Entities.Payment;
@@ -14,7 +13,6 @@ static StandardKernel ConfigureContainer()
 {
     var container = new StandardKernel();
     container.Bind<Context>().To<Context>();
-    var conf = new Configuration();
     var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional: false);
     IConfiguration configuration = builder.Build();
