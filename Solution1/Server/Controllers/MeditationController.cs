@@ -57,19 +57,19 @@ public class MeditationController : ControllerBase
         return Ok();
     }
 
-    [HttpPost]
-    public IActionResult AddMeditation(CreateMeditationRequest model)
-    {
-        var token = HttpContext.Request.Headers.Authorization.ToString();
-        service.Create(model, token);
-        return Ok(new { message = "Meditation created" });
-    }
+    // [HttpPost]
+    // public IActionResult AddMeditation(CreateMeditationRequest model)
+    // {
+    //     var token = HttpContext.Request.Headers.Authorization.ToString();
+    //     service.Create(model, token);
+    //     return Ok(new { message = "Meditation created" });
+    //}
 
-    [HttpPatch]
-    public IActionResult UpdateMeditation(Guid id, UpdateMeditationRequest model)
-    {
-        var token = HttpContext.Request.Headers.Authorization.ToString();
-        service.Update(model, id, token);
-        return Ok(new { message = "Meditation updated" });
-    }
+    // [HttpPatch]
+    // public IActionResult UpdateMeditation(Guid id, UpdateMeditationRequest model)
+    // {
+    //     var token = HttpContext.Request.Headers.Authorization.ToString();
+    //     service.Update(model, id, token);
+    //     return Ok(new { message = "Meditation updated" });
+    // }
 }

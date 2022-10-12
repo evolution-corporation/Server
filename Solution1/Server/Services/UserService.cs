@@ -50,8 +50,14 @@ public class UserService : IUserService
 
     public User Create(CreateUserRequest model, string token)
     {
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var Id = task.Result.Uid;
+
         // validate
-        if (context.Users.Any(x => x.NickName == model.NickName))
+        if (context.Users.Any(x => x.NickName == model.NickName) ||
+            NicknameService.bookedNickname.ContainsKey(model.NickName) &&
+            NicknameService.bookedNickname[model.NickName].Item1.Equals(Id))
             throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
                                    + GenerateUserNickname(model.NickName));
         if (model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()) ||
@@ -59,14 +65,7 @@ public class UserService : IUserService
             throw new AppException("Here is bad word");
         var user = mapper.Map<User>(model);
 
-        if (token.Equals("test"))
-            user.Id = new Random().Next().ToString();
-        else
-        {
-            var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-            task.Wait();
-            user.Id = task.Result.Uid;
-        }
+        user.Id = Id;
 
         if (model.Image != null)
         {
@@ -118,7 +117,7 @@ public class UserService : IUserService
         context.SaveChanges();
         return user;
     }
-    
+
     private User GetUser(string id)
     {
         var query = context.Users.AsQueryable();

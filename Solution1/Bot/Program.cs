@@ -16,8 +16,8 @@ static StandardKernel ConfigureContainer()
     container.Bind<IConfiguration>().ToConstant(config);
     container.Bind<TelegramBot>().To<TelegramBot>();
     var resourceSection = config.GetSection("Resources");
-    var resources = new Resources{MeditationAudio = resourceSection["MeditationAudio"],MeditationImages = resourceSection["MeditationImages"],UserImage = resourceSection["UserImage"]};
-    container.Bind<Resources>().ToConstant(resources);
+    //var resources = new Resources{MeditationAudio = resourceSection["MeditationAudio"],MeditationImages = resourceSection["MeditationImages"],UserImage = resourceSection["UserImage"]};
+    //container.Bind<Resources>().ToConstant(resources);
     return container;
 }
 

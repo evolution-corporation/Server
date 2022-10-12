@@ -16,9 +16,9 @@ public interface IMeditationService
     public IEnumerable<Meditation> GetNotListened(string token, string language);
     public Meditation GetPopular(string language);
 
-    public void Create(CreateMeditationRequest model, string token);
+    //public void Create(CreateMeditationRequest model, string token);
 
-    public void Update(UpdateMeditationRequest model, Guid id, string token);
+    //public void Update(UpdateMeditationRequest model, Guid id, string token);
 
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences);
     public void UserListened(string token, Guid meditationId);
@@ -43,7 +43,7 @@ public class MeditationService : IMeditationService
     {
         var userId = context.GetUserId(token);
         var sub = context.Users.AsQueryable().First(x => x.Id == userId).IsSubscribed || token.Equals("test");
-        var meditation = context.Meditations.AsQueryable().First(x => x.id == id);
+        var meditation = context.Meditations.AsQueryable().First(x => x.Id == id);
         var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.MeditationId == id);
         if (meditation.IsSubscribed && sub)
             throw new ArgumentException("User did not have subscription");
@@ -76,9 +76,9 @@ public class MeditationService : IMeditationService
         var user = queryUser.First(x => x.Id == id).UserMeditations.Select(x => x.MeditationId);
         return queryMeditation
             .Where(x => x.Language == language)
-            .Select(x => x.id)
+            .Select(x => x.Id)
             .Except(user)
-            .Select(x => queryMeditation.First(y => y.id == x));
+            .Select(x => queryMeditation.First(y => y.Id == x));
     }
 
     public Meditation GetPopular(string language)
@@ -90,42 +90,42 @@ public class MeditationService : IMeditationService
         return query.First(x => x.UserMeditations.Count == max && x.Language == language);
     }
 
-    public void Create(CreateMeditationRequest model, string token)
-    {
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        task.Wait();
-        var userId = task.Result.Uid;
-        var user = context.Users.First(x => x.Id == userId);
-        if (user.Role != Role.ADMIN)
-            throw new AuthenticationException("You don't have permision");
-        var meditation = mapper.Map<Meditation>(model);
-        if (model.SubscriptionPhoto != null)
-        {
-            var photo = Convert.FromBase64String(model.SubscriptionPhoto);
-            WriteSubscptionImage(photo,meditation.id);
-        }
+    // public void Create(CreateMeditationRequest model, string token)
+    // {
+    //     var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+    //     task.Wait();
+    //     var userId = task.Result.Uid;
+    //     var user = context.Users.First(x => x.Id == userId);
+    //     if (user.Role != Role.ADMIN)
+    //         throw new AuthenticationException("You don't have permision");
+    //     var meditation = mapper.Map<Meditation>(model);
+    //     if (model.SubscriptionPhoto != null)
+    //     {
+    //         var photo = Convert.FromBase64String(model.SubscriptionPhoto);
+    //         WriteSubscptionImage(photo,meditation.Id);
+    //     }
+    //
+    //     if (model.MeditationPhoto != null)
+    //     {
+    //         var photo = Convert.FromBase64String(model.MeditationPhoto);
+    //         WriteMeditationImage(photo,meditation.Id);
+    //     }
+    //     if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
+    //     meditation.UserMeditations = new List<UserMeditation>();
+    //     context.Meditations.Add(meditation);
+    //     context.SaveChangesAsync();
+    // }
 
-        if (model.MeditationPhoto != null)
-        {
-            var photo = Convert.FromBase64String(model.MeditationPhoto);
-            WriteMeditationImage(photo,meditation.id);
-        }
-        if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
-        meditation.UserMeditations = new List<UserMeditation>();
-        context.Meditations.Add(meditation);
-        context.SaveChangesAsync();
-    }
-
-    public void Update(UpdateMeditationRequest model, Guid id, string token)
-    {
-        FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        var query = context.Meditations.AsQueryable();
-        var meditation = query.First(x => x.id == id);
-        mapper.Map(model, meditation);
-        context.Meditations.Update(meditation);
-        context.SaveChangesAsync();
-    }
-    
+    // public void Update(UpdateMeditationRequest model, Guid id, string token)
+    // {
+    //     FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+    //     var query = context.Meditations.AsQueryable();
+    //     var meditation = query.First(x => x.Id == id);
+    //     mapper.Map(model, meditation);
+    //     context.Meditations.Update(meditation);
+    //     context.SaveChangesAsync();
+    // }
+    //
     public void UserListened(string token, Guid meditationId)
     {
         var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);

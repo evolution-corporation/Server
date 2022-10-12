@@ -34,7 +34,7 @@ public class DataContext : DbContext
     {
         modelBuilder.Entity<UserMeditation>().HasKey(sc => new { sc.UserId, sc.MeditationId });
         modelBuilder.Entity<Notification>().HasKey(x => x.UserId);
-        modelBuilder.Entity<Meditation>().HasKey(x => new { x.id, x.Language });
+        modelBuilder.Entity<Meditation>().HasKey(x => new { Id = x.Id, x.Language });
         base.OnModelCreating(modelBuilder);
     }
 

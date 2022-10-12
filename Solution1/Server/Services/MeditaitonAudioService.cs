@@ -31,16 +31,16 @@ public class MeditationAudioService : IMeditationAudioService
     public string? GetMeditationAudioUrl(Guid meditationId, string userId)
     {
         var user = context.Users.AsQueryable().First(x => x.Id == userId);
-        var meditation = context.Meditations.AsQueryable().First(x => x.id == meditationId);
+        var meditation = context.Meditations.AsQueryable().First(x => x.Id == meditationId);
         if (meditation.IsSubscribed)
         {
             if (user.IsSubscribed)
             {
-                return resources.Storage + resources.AudioBucket + meditation.Language + meditation.id;
+                return resources.Storage + resources.AudioBucket + meditation.Language + meditation.Id;
                 // return meditation.AudioUrl;
             }
             throw new AuthenticationException("Попытка получения медитации без подписки");
         }
-        return resources.Storage + resources.AudioBucket + meditation.Language + meditation.id;
+        return resources.Storage + resources.AudioBucket + meditation.Language + meditation.Id;
     }
 }

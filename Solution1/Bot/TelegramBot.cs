@@ -31,6 +31,8 @@ public class TelegramBot
                 await botClient.SendTextMessageAsync(message.Chat,
                     "Здравствуйте, по нажатию кнопки вы получите список всех доступных для прослушивания медитаций",
                     replyMarkup: markup, cancellationToken: cancellationToken);
+                Thread.Sleep(6000);
+                await botClient.SendTextMessageAsync(message.Chat, "Hello");
             }
 
             if (message.Text.ToLower().Equals("Список медитаций"))
@@ -44,18 +46,18 @@ public class TelegramBot
                     cancellationToken: cancellationToken);
             }
 
-            if (message.Text.ToLower().StartsWith("/get_meditation"))
-            {
-                var id = Convert.ToInt32(message.Text.Split()[1]);
-                if (!dictionary.ContainsKey(message.Chat.Username))
-                    return;
-                await botClient.SendTextMessageAsync(message.Chat,
-                    dictionary[message.Chat.Username][id - 1].Description!, cancellationToken: cancellationToken);
-                var meditation = dictionary[message.Chat.Username][id - 1];
-                var file = File.OpenRead($"{resources.MeditationAudio}/{meditation.id}");
-                await botClient.SendAudioAsync(message.Chat, new InputOnlineFile(file, meditation.Name),
-                    cancellationToken: cancellationToken);
-            }
+            // if (message.Text.ToLower().StartsWith("/get_meditation"))
+            // {
+            //     var id = Convert.ToInt32(message.Text.Split()[1]);
+            //     if (!dictionary.ContainsKey(message.Chat.Username))
+            //         return;
+            //     await botClient.SendTextMessageAsync(message.Chat,
+            //         dictionary[message.Chat.Username][id - 1].Description!, cancellationToken: cancellationToken);
+            //     var meditation = dictionary[message.Chat.Username][id - 1];
+            //     var file = File.OpenRead($"{resources.MeditationAudio}/{meditation.id}");
+            //     await botClient.SendAudioAsync(message.Chat, new InputOnlineFile(file, meditation.Name),
+            //         cancellationToken: cancellationToken);
+            // }
         }
     }
 
