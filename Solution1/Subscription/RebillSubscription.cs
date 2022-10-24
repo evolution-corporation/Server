@@ -2,14 +2,39 @@
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Ninject;
-using Payments;
-using Payments.Entities.Payment;
-using Payments.Entities.Subscribe;
+using Subscription;
+using Subscription.Entities.Payment;
+using Subscription.Entities.Subscribe;
 
 namespace Payments;
 
 public class RebillSubscription
 {
+    
+    public static bool RebillSubscribe(Subscribe subscribe, Context context, TinkoffCredential credential)
+    {
+        var client = new HttpClient();
+        var rebillId = subscribe.RebillId;
+        if (rebillId == -1)
+            return false;
+        var payment = new Payment(subscribe.UserId)
+        {
+            Amount = SubcribeTypeConverter(subscribe.Type)
+        };
+        var response = InitPayment(credential, subscribe.UserId, false,
+            SubcribeTypeConverter(subscribe.Type),
+            payment.Id, client);
+        var result = ChargePayment(credential, response, rebillId, client);
+        if (result.Success)
+        {
+            context.Payments.Add(payment);
+            subscribe.RemainingTime += Subscribe.Convert(subscribe.UserId, subscribe.Type).RemainingTime;
+            context.SaveChanges();
+            return true;
+        }
+        return false;
+    }
+    
     static StandardKernel ConfigureContainer()
     {
         var container = new StandardKernel();
@@ -65,38 +90,5 @@ public class RebillSubscription
         };
     }
 
-    public void Run()
-    {
-        var container = ConfigureContainer();
-        while(true)
-        {
-            var context = container.Get<Context>();
-            var subscribes = context.Subscribes;
-            var credential = container.Get<TinkoffCredential>();
-            var client = new HttpClient();
-            foreach (var subscribe in subscribes)
-            {
-                var rebillId = subscribe.RebillId;
-                if (rebillId == -1)
-                    continue;
-                if (subscribe.RemainingTime == 1)
-                {
-                    var payment = new Payment(subscribe.UserId)
-                    {
-                        Amount = SubcribeTypeConverter(subscribe.Type)
-                    };
-                    var response = InitPayment(credential, subscribe.UserId, false,
-                        SubcribeTypeConverter(subscribe.Type),
-                        payment.Id, client);
-                    var result = ChargePayment(credential, response, rebillId, client);
-                    if (result.Success)
-                    {
-                        context.Payments.Add(payment);
-                        subscribe.RemainingTime += Subscribe.Convert(subscribe.UserId, subscribe.Type).RemainingTime;
-                        context.SaveChanges();
-                    }
-                }
-            }
-        }
-    }
+    
 }

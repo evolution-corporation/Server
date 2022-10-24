@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj": {}
+    "C:\\Users\\permm\\RiderProjects\\Server\\Solution1\\Expo\\Expo.csproj": {}
   },
   "projects": {
-    "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj": {
+    "C:\\Users\\permm\\RiderProjects\\Server\\Solution1\\Expo\\Expo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj",
+        "projectUniqueName": "C:\\Users\\permm\\RiderProjects\\Server\\Solution1\\Expo\\Expo.csproj",
         "projectName": "Expo",
-        "projectPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\Expo.csproj",
-        "packagesPath": "C:\\Users\\kkish\\.nuget\\packages\\",
-        "outputPath": "D:\\Govno_code\\работа\\EvolutionServer\\Solution1\\Expo\\obj\\",
+        "projectPath": "C:\\Users\\permm\\RiderProjects\\Server\\Solution1\\Expo\\Expo.csproj",
+        "packagesPath": "C:\\Users\\permm\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\permm\\RiderProjects\\Server\\Solution1\\Expo\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\kkish\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\permm\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
@@ -49,7 +49,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -58,7 +59,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.305\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -11,7 +11,7 @@ public class User
     public Role Role { get; set; }
     public UserGender Gender { get; set; }
     public DateTime DateTimeRegistration { get; set; } = DateTime.Now;
-    public bool HasPhoto { get; set; }
+    public Guid? PhotoId { get; set; }
     // ReSharper disable once CollectionNeverUpdated.Global
     public IList<UserMeditation> UserMeditations { get; set; }
     // public int RebillId { get; set; } = -1;

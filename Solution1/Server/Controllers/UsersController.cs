@@ -46,9 +46,7 @@ public class UsersController : ControllerBase
     public IActionResult Update( UpdateUserRequest model, string userId)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        task.Wait();
-        _userService.Update(task.Result.Uid, model, userId);
+        _userService.Update(token, model, userId);
         return Ok(new { message = "User updated" });
     }
 

@@ -4,7 +4,7 @@ namespace Server.Services;
 
 public interface IMeditationImageService
 {
-    public string GetMeditationImage(int id);
+    public string GetMeditationImage(Guid id);
 }
 
 public class MeditationImageService : IMeditationImageService
@@ -18,5 +18,6 @@ public class MeditationImageService : IMeditationImageService
         this.resources = resources;
     }
 
-    public string GetMeditationImage(int id) => resources.Storage + resources.MeditationImages + id;
+    public string GetMeditationImage(Guid id) => resources.Storage + resources.MeditationImages +
+                                                 context.Meditations.First(x => x.Id == id).PhotoId;
 }

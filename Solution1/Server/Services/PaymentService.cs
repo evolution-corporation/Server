@@ -30,17 +30,17 @@ public class PaymentService : IPaymentService
 
     public string SubscribeUser(string token, bool recurrentPayment, SubscribeType type)
     {
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        task.Wait();
-        var guid = task.Result.Uid;
-        payment = new Payment(guid)
+        var user = context.GetUser(token);
+        if (user == null)
+            throw new NotSupportedException();
+        payment = new Payment(user.Id)
         {
             RecurrentPayment = recurrentPayment,
             Amount = SubcribeTypeConverter(type)
         };
         context.Payments.Add(payment);
         context.SaveChanges();
-        var result = InitPayment(guid, recurrentPayment, SubcribeTypeConverter(type), payment.Id);
+        var result = InitPayment(user.Id, recurrentPayment, SubcribeTypeConverter(type), payment.Id);
         // Task.Run(() => CheckPaymentResult(guid, type));
         return result;
     }

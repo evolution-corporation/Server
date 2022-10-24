@@ -22,10 +22,10 @@ public class NotificationService : INotificationService
 
     public void SubUserNotification(string userToken, string expoToken, int notificationFrequency)
     {
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(userToken);
-        task.Wait();
-        var uid = task.Result.Uid;
-        var notification = Context.Notifications.AsQueryable().FirstOrDefault(x => x.UserId == uid);
+        var user = Context.GetUser(userToken);
+        if (user == null)
+            throw new NotSupportedException();
+        var notification = Context.Notifications.AsQueryable().FirstOrDefault(x => x.UserId == user.Id);
         if (notification != null)
         {
             notification.IsSubscribedToNotification = true;
@@ -33,7 +33,7 @@ public class NotificationService : INotificationService
             return;
         }
 
-        notification = new Notification(uid, expoToken, notificationFrequency)
+        notification = new Notification(user.Id, expoToken, notificationFrequency)
         {
             IsSubscribedToNotification = true
         };

@@ -1,0 +1,12 @@
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\bin\Release\net6.0\Expo.deps.json
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\bin\Release\net6.0\Expo.dll
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\bin\Release\net6.0\Expo.pdb
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\Expo.csproj.AssemblyReference.cache
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\Expo.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\Expo.AssemblyInfoInputs.cache
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\Expo.AssemblyInfo.cs
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\Expo.csproj.CoreCompileInputs.cache
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\Expo.dll
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\refint\Expo.dll
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\Expo.pdb
+C:\Users\permm\RiderProjects\Server\Solution1\Expo\obj\Release\net6.0\ref\Expo.dll

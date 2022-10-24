@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Server.Entities;
+using Server.Entities.Mediatation;
 using Server.Helpers;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;

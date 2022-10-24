@@ -15,7 +15,7 @@ public interface IUserService
     IEnumerable<User> GetAll();
     User GetById(string id);
     User Create(CreateUserRequest model, string token);
-    void Update(string adminId, UpdateUserRequest model, string userId);
+    void Update(string token, UpdateUserRequest model, string userId);
     User UpdateByUser(string token, UpdateUserRequest model);
 }
 
@@ -64,15 +64,16 @@ public class UserService : IUserService
             model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()))
             throw new AppException("Here is bad word");
         var user = mapper.Map<User>(model);
-
+        
         user.Id = Id;
 
         if (model.Image != null)
         {
             Console.WriteLine(model.Image);
             var photo = Convert.FromBase64String(model.Image);
-            WriteObject(photo, user.Id);
-            user.HasPhoto = true;
+            var photoId = Guid.NewGuid();
+            WriteObject(photo, photoId.ToString());
+            user.PhotoId = photoId;
         }
 
         user.UserMeditations = new List<UserMeditation>();
@@ -81,10 +82,10 @@ public class UserService : IUserService
         return user;
     }
 
-    public void Update(string adminId, UpdateUserRequest model, string userId)
+    public void Update(string token, UpdateUserRequest model, string userId)
     {
-        var admin = GetUser(adminId);
-        if (admin.Role != Role.ADMIN)
+        var admin = context.GetUser(token);
+        if (admin is not { Role: Role.ADMIN })
             throw new AuthenticationException("You don't have permission");
         var user = GetUser(userId);
         // copy model to user and save
@@ -103,15 +104,16 @@ public class UserService : IUserService
         if (model.NickName != null)
             if (context.Users.Any(x => x.NickName == model.NickName))
                 throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
-                                       + string.Join(",", GenerateUserNickname(model.NickName)));
+                                       + string.Join(", ", GenerateUserNickname(model.NickName)));
         if (model.Image != null)
         {
-            if (user.HasPhoto) DeleteObject(user.Id);
+            if (user.PhotoId != null) DeleteObject(user.Id);
             var photo = Convert.FromBase64String(model.Image);
-            WriteObject(photo, user.Id);
-            user.HasPhoto = true;
+            var photoId = Guid.NewGuid();
+            WriteObject(photo, photoId.ToString());
+            user.PhotoId = photoId;
         }
-
+        user.UserMeditations = new List<UserMeditation>();
         mapper.Map(model, user);
         context.Users.Update(user);
         context.SaveChanges();
@@ -134,13 +136,13 @@ public class UserService : IUserService
         return list.ToArray();
     }
 
-    private void WriteObject(byte[] photo, string userId)
+    private void WriteObject(byte[] photo, string objectName)
     {
         var ms = new MemoryStream(photo);
         var req = new PutObjectRequest
         {
             BucketName = resources.ImageBucket,
-            Key = resources.UserImage + userId,
+            Key = resources.UserImage + objectName,
             InputStream = ms
         };
         var task = s3.PutObjectAsync(req);

@@ -21,15 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Resources\Meditation\Audio" />
-      <Folder Include="Resources\Meditation\Images" />
-      <Folder Include="Resources\Meditation\SubscriptionImage" />
-      <Folder Include="Resources\UserImage" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Expo\Expo.csproj" />
-      <ProjectReference Include="..\Payments\Payments.csproj" />
       <ProjectReference Include="..\Subscription\Subscription.csproj" />
     </ItemGroup>
 

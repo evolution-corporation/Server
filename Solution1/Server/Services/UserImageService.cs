@@ -25,10 +25,8 @@ public class UserImageService : IUserImageService
     public string GetUserImage(string userId)
     {
         var user = context.Users.First(x => x.Id == userId);
-        if (!user.HasPhoto)
+        if (user.PhotoId == null)
             throw new ArgumentException("User don't have a photo");
-        // var file = File.ReadAllBytes(resources.UserImage + "/" + userId + ".png");
-        // var base64 = Convert.ToBase64String(file);
-        return resources.Storage + "/" + resources.ImageBucket + "/" + resources.UserImage + userId;
+        return resources.Storage + "/" + resources.ImageBucket + "/" + resources.UserImage + user.PhotoId;
     }
 }

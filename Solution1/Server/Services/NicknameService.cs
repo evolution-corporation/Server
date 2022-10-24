@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Diagnostics.CodeAnalysis;
+using AutoMapper;
 using FirebaseAdmin.Auth;
 using Server.Entities;
 using Server.Helpers;
@@ -22,14 +23,16 @@ public class NicknameService : INicknameService
         bookedNickname = new Dictionary<string, Tuple<string, DateTime>>();
     }
 
+    [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: Enumerator[System.String,System.Tuple`2[System.String,System.DateTime]]")]
     public static void Run()
     {
         var timeSpan = new TimeSpan(0, 3, 0);
         while (true)
         {
-            foreach (var pair in from pair in bookedNickname
-                     where DateTime.Now - pair.Value.Item2 < timeSpan
-                     select pair)
+            var list = (from pair in bookedNickname
+                where DateTime.Now - pair.Value.Item2 < timeSpan
+                select pair).ToList();
+            foreach (var pair in list)
                 bookedNickname.Remove(pair.Key);
         }
     }
@@ -47,9 +50,9 @@ public class NicknameService : INicknameService
 
     public void NicknameBooking(string nickname, string token)
     {
+        //var user = context.GetUser(token);
         var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         task.Wait();
-        var id = task.Result.Uid;
-        bookedNickname.Add(nickname, new Tuple<string, DateTime>(id, DateTime.Now));
+        bookedNickname.Add(nickname, new Tuple<string, DateTime>(task.Result.Uid, DateTime.Now));
     }
 }

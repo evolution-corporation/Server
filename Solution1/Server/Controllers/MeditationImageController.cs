@@ -15,7 +15,7 @@ public class MeditationImageController: ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetMeditationImage(int id)
+    public IActionResult GetMeditationImage(Guid id)
     {
         return Ok(service.GetMeditationImage(id));
     }

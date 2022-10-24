@@ -1,4 +1,4 @@
-﻿namespace Server.Entities;
+﻿namespace Server.Entities.Mediatation;
 
 public enum CountDayMeditation
 {

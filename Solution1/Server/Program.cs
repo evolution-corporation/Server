@@ -2,7 +2,6 @@
 using Amazon.S3;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
-using Payments;
 using Server.Controllers;
 using Server.Helpers;
 using Server.Services;
@@ -11,7 +10,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 using TinkoffCredential = Server.Helpers.TinkoffCredential;
 
 var builder = WebApplication.CreateBuilder(args);
-var ip = "http://localhost:8000";
+var ip = "http://*:8000";
 // add services to DI container
 {
     var services = builder.Services;
@@ -20,13 +19,10 @@ var ip = "http://localhost:8000";
     services.AddCors();
     services.AddControllers().AddJsonOptions(x =>
     {
-        // var stockConverterOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        // stockConverterOptions.Converters.Add(new JsonStringEnumConverter());
-        // var stockConverter = new TestSerializer(stockConverterOptions);
-        // x.JsonSerializerOptions.Converters.Add(stockConverter);
-        // // serialize enums as strings in api responses (e.g. Role)
+        // serialize enums as strings in api responses (e.g. Role)
         x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        //ignore omitted parameters on models to enable optional params (e.g. User update)
+
+        // ignore omitted parameters on models to enable optional params (e.g. User update)
         x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         x.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
@@ -60,11 +56,9 @@ var ip = "http://localhost:8000";
     services.AddScoped<INotificationService, NotificationService>();
     services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
     services.AddScoped<IMeditationAudioService, MeditationAudioService>();
-    services.AddScoped<ISubscribeService, SubscribeService>();
-    //var task = xyu.GetBucketVersioningAsync(resources.ImageBucket);
-    //task.Wait();
-    services.AddSingleton(_ => new AmazonS3Client(new AmazonS3Config() { ServiceURL = "https://s3.yandexcloud.net" }));
-    services.AddScoped<Notificator>();
+    new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }).GetBucketVersioningAsync(
+        resources.ImageBucket);
+    services.AddSingleton(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {
@@ -88,6 +82,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
     app.MapControllers();
 }
-new Task(() => new RebillSubscription().Run()).Start();
+
 new Task(() => new CheckSubscription().Run()).Start();
+new Task(NicknameService.Run).Start();
 app.Run(ip);

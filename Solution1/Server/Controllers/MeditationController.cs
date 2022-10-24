@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Server.Entities;
+using Server.Entities.Mediatation;
 using Server.Models.Meditation;
 using Server.Services;
 
@@ -57,13 +58,13 @@ public class MeditationController : ControllerBase
         return Ok();
     }
 
-    // [HttpPost]
-    // public IActionResult AddMeditation(CreateMeditationRequest model)
-    // {
-    //     var token = HttpContext.Request.Headers.Authorization.ToString();
-    //     service.Create(model, token);
-    //     return Ok(new { message = "Meditation created" });
-    //}
+     [HttpPost]
+     public IActionResult AddMeditation(CreateMeditationRequest model)
+     {
+         var token = HttpContext.Request.Headers.Authorization.ToString();
+         service.Create(model, token);
+         return Ok(new { message = "Meditation created" });
+    }
 
     // [HttpPatch]
     // public IActionResult UpdateMeditation(Guid id, UpdateMeditationRequest model)

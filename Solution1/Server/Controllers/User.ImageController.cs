@@ -20,9 +20,7 @@ public class UserImage: ControllerBase
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
         if (token != id)
-        {
             throw new AuthenticationException("Попытка получить фотографию пользователя без токена");
-        }
         return Ok(_service.GetUserImage(id));
     }
 }

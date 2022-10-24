@@ -30,17 +30,12 @@ public class MeditationAudioService : IMeditationAudioService
 
     public string? GetMeditationAudioUrl(Guid meditationId, string userId)
     {
-        var user = context.Users.AsQueryable().First(x => x.Id == userId);
+        var user = context.Subscribes.FirstOrDefault(x => x.UserId == userId);
         var meditation = context.Meditations.AsQueryable().First(x => x.Id == meditationId);
-        if (meditation.IsSubscribed)
-        {
-            if (user.IsSubscribed)
-            {
-                return resources.Storage + resources.AudioBucket + meditation.Language + meditation.Id;
-                // return meditation.AudioUrl;
-            }
-            throw new AuthenticationException("Попытка получения медитации без подписки");
-        }
-        return resources.Storage + resources.AudioBucket + meditation.Language + meditation.Id;
+        if (!meditation.IsSubscribed)
+            return resources.Storage + resources.AudioBucket + meditation.Language + meditation.AudioId;
+        if (user != null)
+            return resources.Storage + resources.AudioBucket + meditation.Language + meditation.AudioId;
+        throw new AuthenticationException("Попытка получения медитации без подписки");
     }
 }

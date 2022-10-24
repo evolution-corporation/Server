@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders.Physical;
 
 namespace Server.Controllers;
 [ApiController]
@@ -9,9 +10,9 @@ public class TestController: ControllerBase
     [HttpGet]
     public IActionResult Get204()
     {
-        Console.Write(HttpContext.Connection.RemoteIpAddress);
-        Console.Write(HttpContext.Connection.LocalIpAddress);
-        return NoContent();
+        var file = new FileInfo("/test/xyu");
+        HttpContext.Response.SendFileAsync(new PhysicalFileInfo(file));
+        return Ok();
     }
 }
 

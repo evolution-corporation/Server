@@ -8,7 +8,6 @@ namespace Server.Services;
 
 public interface ISubscribeService
 {
-
    public Subscribe GetUserSubscribe(string token);
    public Subscribe GetUserSubscribeByAdmin(string userId, string token);
 }
@@ -24,17 +23,17 @@ public class SubscribeService: ISubscribeService
 
    public Subscribe GetUserSubscribe(string token)
    {
-      var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-      task.Wait();
-      var id = task.Result.Uid;
-      return context.Subscribes.AsQueryable().First(x => x.UserId == id);
+      var user = context.GetUser(token);
+      if (user == null)
+         throw new NotSupportedException();
+      return context.Subscribes.AsQueryable().First(x => x.UserId == user.Id);
    }
 
    public Subscribe GetUserSubscribeByAdmin(string userId, string token)
    {
-      var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-      task.Wait();
-      var admin = context.Users.First(x => x.Id == task.Result.Uid);
+      var admin = context.GetUser(token);
+      if (admin == null)
+         throw new NotSupportedException();
       if (admin.Role != Role.ADMIN)
       {
          throw new AuthenticationException("You don't have permission");

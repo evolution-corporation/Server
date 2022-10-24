@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Ninject;
-using Subscription;
+using Payments;
 
 namespace Subscription;
 
@@ -15,6 +16,9 @@ public class CheckSubscription
             .AddJsonFile("appsettings.json", optional: false);
         IConfiguration configuration = builder.Build();
         container.Bind<IConfiguration>().ToConstant(configuration);
+        var credential = (TinkoffCredential)JsonSerializer.Deserialize(
+            configuration.GetSection("TinkoffCredential").Value, typeof(TinkoffCredential))!;
+        container.Bind<TinkoffCredential>().ToConstant(credential);
         return container;
     }
 
@@ -24,10 +28,10 @@ public class CheckSubscription
         var context = container.Get<Context>();
         foreach (var subscribe in context.Subscribes)
         {
-            subscribe.RemainingTime--;
-            if (subscribe.RemainingTime < 0)
+            if (subscribe.WhenSubscribe + new TimeSpan(subscribe.RemainingTime, 0, 0, 0) < DateTime.Now)
             {
-                context.Users.First(x => x.Id == subscribe.UserId).IsSubscribed = false;
+                context.Users.First(x => x.Id == subscribe.UserId).IsSubscribed =
+                    RebillSubscription.RebillSubscribe(subscribe, context, container.Get<TinkoffCredential>());
             }
         }
         Thread.Sleep(86400000);

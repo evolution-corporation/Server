@@ -4,6 +4,7 @@ using Amazon.S3.Model;
 using AutoMapper;
 using FirebaseAdmin.Auth;
 using Server.Entities;
+using Server.Entities.Mediatation;
 using Server.Helpers;
 using Server.Models.Meditation;
 
@@ -16,7 +17,7 @@ public interface IMeditationService
     public IEnumerable<Meditation> GetNotListened(string token, string language);
     public Meditation GetPopular(string language);
 
-    //public void Create(CreateMeditationRequest model, string token);
+    public void Create(CreateMeditationRequest model, string token);
 
     //public void Update(UpdateMeditationRequest model, Guid id, string token);
 
@@ -41,8 +42,10 @@ public class MeditationService : IMeditationService
 
     public object GetById(Guid id, string token)
     {
-        var userId = context.GetUserId(token);
-        var sub = context.Users.AsQueryable().First(x => x.Id == userId).IsSubscribed || token.Equals("test");
+        var user = context.GetUser(token);
+        if (user == null)
+            throw new NotSupportedException();
+        var sub = user.IsSubscribed;
         var meditation = context.Meditations.AsQueryable().First(x => x.Id == id);
         var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.MeditationId == id);
         if (meditation.IsSubscribed && sub)
@@ -53,7 +56,6 @@ public class MeditationService : IMeditationService
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences)
     {
         return context.Meditations.AsQueryable().Where(x =>
-                (preferences.Time == null || x.Time == preferences.Time) &&
                 (preferences.TypeMeditation == null || preferences.TypeMeditation == x.TypeMeditation))
             .ToArray();
     }
@@ -90,31 +92,31 @@ public class MeditationService : IMeditationService
         return query.First(x => x.UserMeditations.Count == max && x.Language == language);
     }
 
-    // public void Create(CreateMeditationRequest model, string token)
-    // {
-    //     var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-    //     task.Wait();
-    //     var userId = task.Result.Uid;
-    //     var user = context.Users.First(x => x.Id == userId);
-    //     if (user.Role != Role.ADMIN)
-    //         throw new AuthenticationException("You don't have permision");
-    //     var meditation = mapper.Map<Meditation>(model);
-    //     if (model.SubscriptionPhoto != null)
-    //     {
-    //         var photo = Convert.FromBase64String(model.SubscriptionPhoto);
-    //         WriteSubscptionImage(photo,meditation.Id);
-    //     }
-    //
-    //     if (model.MeditationPhoto != null)
-    //     {
-    //         var photo = Convert.FromBase64String(model.MeditationPhoto);
-    //         WriteMeditationImage(photo,meditation.Id);
-    //     }
-    //     if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
-    //     meditation.UserMeditations = new List<UserMeditation>();
-    //     context.Meditations.Add(meditation);
-    //     context.SaveChangesAsync();
-    // }
+    public void Create(CreateMeditationRequest model, string token)
+    {
+        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        task.Wait();
+        var userId = task.Result.Uid;
+        var user = context.Users.First(x => x.Id == userId);
+        if (user.Role != Role.ADMIN)
+            throw new AuthenticationException("You don't have permision");
+        var meditation = mapper.Map<Meditation>(model);
+        if (model.SubscriptionPhoto != null)
+        {
+            var photo = Convert.FromBase64String(model.SubscriptionPhoto);
+            WriteSubscptionImage(photo,meditation.Id);
+        }
+    
+        if (model.MeditationPhoto != null)
+        {
+            var photo = Convert.FromBase64String(model.MeditationPhoto);
+            WriteMeditationImage(photo,meditation.Id);
+        }
+        if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
+        meditation.UserMeditations = new List<UserMeditation>();
+        context.Meditations.Add(meditation);
+        context.SaveChangesAsync();
+    }
 
     // public void Update(UpdateMeditationRequest model, Guid id, string token)
     // {
