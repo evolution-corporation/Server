@@ -10,8 +10,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 using TinkoffCredential = Server.Helpers.TinkoffCredential;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Environment.WebRootPath = Directory.GetCurrentDirectory() + "/..";
-var x = Environment.GetEnvironmentVariable("Evolution");
+//builder.Environment.WebRootPath = Directory.GetCurrentDirectory() + "/..";
 var ip = "http://*:8000";
 // add services to DI container
 {
