@@ -10,6 +10,8 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 using TinkoffCredential = Server.Helpers.TinkoffCredential;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Environment.WebRootPath = Directory.GetCurrentDirectory() + "/..";
+var x = Environment.GetEnvironmentVariable("Evolution");
 var ip = "http://*:8000";
 // add services to DI container
 {
@@ -27,20 +29,23 @@ var ip = "http://*:8000";
         x.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
     services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-    var resourceSection = builder.Configuration.GetSection("Resources");
-    var resources = new Resources
-    {
-        Storage = resourceSection["Storage"],
-        ImageBucket = resourceSection["ImageBucket"],
-        AudioBucket = resourceSection["AudioBucket"],
-        SubscriptionImages = resourceSection["SubscriptionImages"],
-        MeditationImages = resourceSection["MeditationImages"],
-        UserImage = resourceSection["UserImage"]
-    };
+    //var resourceSection = builder.Configuration.GetSection("Resources");
+    // var resources = new Resources
+    // {
+    //     Storage = resourceSection["Storage"],
+    //     ImageBucket = resourceSection["ImageBucket"],
+    //     AudioBucket = resourceSection["AudioBucket"],
+    //     SubscriptionImages = resourceSection["SubscriptionImages"],
+    //     MeditationImages = resourceSection["MeditationImages"],
+    //     UserImage = resourceSection["UserImage"]
+    // };
+
+    var resources = JsonSerializer.Deserialize<Resources>(Environment.GetEnvironmentVariable("Resources"));
+
     services.AddSingleton(_ => resources);
     //services.Configure<Resources>(builder.Configuration.GetSection("Resources"));
-    var str = builder.Configuration["TinkoffCredential"];
-    var credential = (TinkoffCredential)JsonSerializer.Deserialize(str, typeof(TinkoffCredential))!;
+    var credential =
+        JsonSerializer.Deserialize<TinkoffCredential>(Environment.GetEnvironmentVariable("TinkoffCredential"))!;
     if (credential == null)
         throw new ArgumentException("You forgot about Tinkoff credentials!");
     services.AddSingleton(_ => credential);
@@ -62,8 +67,9 @@ var ip = "http://*:8000";
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {
-        Credential =
-            GoogleCredential.FromJson(builder.Configuration["GoogleCredential"]),
+        Credential = GoogleCredential.FromJson(Environment.GetEnvironmentVariable("GoogleCredential")),
+        //Credential =
+          //  GoogleCredential.FromJson(Environment.GetEnvironmentVariable("GoogleCredential")),
         ProjectId = "plants-336217",
     });
 }
