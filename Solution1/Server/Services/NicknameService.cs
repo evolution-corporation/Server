@@ -50,9 +50,9 @@ public class NicknameService : INicknameService
 
     public void NicknameBooking(string nickname, string token)
     {
-        //var user = context.GetUser(token);
         var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
         task.Wait();
-        bookedNickname.Add(nickname, new Tuple<string, DateTime>(task.Result.Uid, DateTime.Now));
+        if(!bookedNickname.ContainsKey(nickname))
+            bookedNickname.Add(nickname, new Tuple<string, DateTime>(task.Result.Uid, DateTime.Now));
     }
 }

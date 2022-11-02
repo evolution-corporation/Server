@@ -54,6 +54,7 @@ public class MeditationController : ControllerBase
     public IActionResult AddMeditation(Guid meditationId)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
+        
         service.UserListened(token, meditationId);
         return Ok();
     }

@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "tN/04uez6/zDwb2W6WUtzkpCRM4IY+ldcw4NGefmnNswN8mssU2wywUoea0vohZ4ezDHQEPANHktnGH9qcHWAg==",
+  "dgSpecHash": "u/Zlr55lM2KuQgzelY30My8x+MKGNSPBqL1U9zeho58xz6BaUf5hlv23PVHI3Mb7V4LQcjKN6J7/MFpIA9c1MQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\permm\\RiderProjects\\Server\\Solution1\\Expo\\Expo.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\permm\\.nuget\\packages\\newtonsoft.json\\13.0.2-beta1\\newtonsoft.json.13.0.2-beta1.nupkg.sha512"
+    "C:\\Users\\permm\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
   ],
   "logs": []
 }

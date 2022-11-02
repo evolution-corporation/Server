@@ -14,6 +14,7 @@ public class User
     public Guid? PhotoId { get; set; }
     // ReSharper disable once CollectionNeverUpdated.Global
     public IList<UserMeditation> UserMeditations { get; set; }
+    //public Subscribe Subscribe { get; set; }
     // public int RebillId { get; set; } = -1;
     public bool IsSubscribed { get; set; }
 }

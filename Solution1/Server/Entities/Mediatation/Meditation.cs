@@ -7,7 +7,7 @@ public class Meditation
     public string? Name { get; set; }
     public string? Description { get; set; }
     public TypeMeditation TypeMeditation { get; set; }
-    
+    public Subscription? Subscription { get; set; }
     public bool IsSubscribed { get; set; }
     public Guid? AudioId { get; set; }
     public int AudioLength { get; set; }

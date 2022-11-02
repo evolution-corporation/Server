@@ -47,7 +47,7 @@ public class MeditationService : IMeditationService
             throw new NotSupportedException();
         var sub = user.IsSubscribed;
         var meditation = context.Meditations.AsQueryable().First(x => x.Id == id);
-        var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.MeditationId == id);
+        var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.Id == id);
         if (meditation.IsSubscribed && sub)
             throw new ArgumentException("User did not have subscription");
         return new { Meditation = meditation, Subscription = subscription };
@@ -59,7 +59,7 @@ public class MeditationService : IMeditationService
                 (preferences.TypeMeditation == null || preferences.TypeMeditation == x.TypeMeditation))
             .ToArray();
     }
-    
+
 
     public object GetAllMeditation(string language, int countOfMeditations)
     {
@@ -75,9 +75,12 @@ public class MeditationService : IMeditationService
         var queryUser = context.Users.AsQueryable();
         var queryMeditation = context.Meditations.AsQueryable();
         var id = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
-        var user = queryUser.First(x => x.Id == id).UserMeditations.Select(x => x.MeditationId);
+        //var user = queryUser.First(x => x.Id == id).UserMeditations.Select(x => x.MeditationId);
+        var user = context.UserMeditations
+            .Where(x => x.User.Equals(id))
+            .Select(x => x.Meditation);
         return queryMeditation
-            .Where(x => x.Language == language)
+            .Where(x => x.Language == language && x.TypeMeditation != TypeMeditation.Set)
             .Select(x => x.Id)
             .Except(user)
             .Select(x => queryMeditation.First(y => y.Id == x));
@@ -87,7 +90,7 @@ public class MeditationService : IMeditationService
     {
         var query = context.Meditations.AsQueryable();
         var max = query
-            .Where(x => x.Language == language)
+            .Where(x => x.Language == language && x.TypeMeditation != TypeMeditation.Set)
             .Max(x => x.UserMeditations.Count);
         return query.First(x => x.UserMeditations.Count == max && x.Language == language);
     }
@@ -104,18 +107,19 @@ public class MeditationService : IMeditationService
         if (model.SubscriptionPhoto != null)
         {
             var photo = Convert.FromBase64String(model.SubscriptionPhoto);
-            WriteSubscptionImage(photo,meditation.Id);
+            WriteSubscptionImage(photo, meditation.Id);
         }
-    
+
         if (model.MeditationPhoto != null)
         {
             var photo = Convert.FromBase64String(model.MeditationPhoto);
-            WriteMeditationImage(photo,meditation.Id);
+            WriteMeditationImage(photo, meditation.Id);
         }
+
         if (model.Subscription != null) context.MeditationSubscriptions.Add(model.Subscription);
         meditation.UserMeditations = new List<UserMeditation>();
         context.Meditations.Add(meditation);
-        context.SaveChangesAsync();
+        context.SaveChangesAsync().Wait();
     }
 
     // public void Update(UpdateMeditationRequest model, Guid id, string token)
@@ -130,15 +134,14 @@ public class MeditationService : IMeditationService
     //
     public void UserListened(string token, Guid meditationId)
     {
-        var task = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-        task.Wait();
-        var uid = task.Result.Uid;
-        var n = new UserMeditation(uid, meditationId, DateTime.Today);
+        
+        var user = context.GetUser(token);
+        var n = new UserMeditation(user.Id , meditationId, DateTime.Today);
         if (!context.UserMeditations.Contains(n))
             context.UserMeditations.Add(n);
         context.SaveChanges();
     }
-    
+
     //TODO: Переделать на запись в папку по языку
     private void WriteMeditationImage(byte[] photo, Guid meditationId)
     {
@@ -153,7 +156,7 @@ public class MeditationService : IMeditationService
         task.Wait();
     }
 
-    private void WriteSubscptionImage(byte[] photo,Guid meditationId)
+    private void WriteSubscptionImage(byte[] photo, Guid meditationId)
     {
         var ms = new MemoryStream(photo);
         var req = new PutObjectRequest

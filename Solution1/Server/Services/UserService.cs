@@ -69,13 +69,11 @@ public class UserService : IUserService
 
         if (model.Image != null)
         {
-            Console.WriteLine(model.Image);
             var photo = Convert.FromBase64String(model.Image);
             var photoId = Guid.NewGuid();
             WriteObject(photo, photoId.ToString());
             user.PhotoId = photoId;
         }
-
         user.UserMeditations = new List<UserMeditation>();
         context.Users.Add(user);
         context.SaveChanges();
@@ -107,13 +105,13 @@ public class UserService : IUserService
                                        + string.Join(", ", GenerateUserNickname(model.NickName)));
         if (model.Image != null)
         {
-            if (user.PhotoId != null) DeleteObject(user.Id);
+            if (user.PhotoId != null) DeleteObject((Guid)user.PhotoId);
             var photo = Convert.FromBase64String(model.Image);
             var photoId = Guid.NewGuid();
             WriteObject(photo, photoId.ToString());
             user.PhotoId = photoId;
+            Console.WriteLine("Photo changed");
         }
-        user.UserMeditations = new List<UserMeditation>();
         mapper.Map(model, user);
         context.Users.Update(user);
         context.SaveChanges();
@@ -142,19 +140,19 @@ public class UserService : IUserService
         var req = new PutObjectRequest
         {
             BucketName = resources.ImageBucket,
-            Key = resources.UserImage + objectName,
+            Key = resources.UserImage + objectName + ".png",
             InputStream = ms
         };
         var task = s3.PutObjectAsync(req);
         task.Wait();
     }
 
-    private void DeleteObject(string userId)
+    private void DeleteObject(Guid photoId)
     {
         var req = new DeleteObjectRequest
         {
             BucketName = resources.ImageBucket,
-            Key = resources.UserImage + userId
+            Key = resources.UserImage + photoId + ".png"
         };
         var task = s3.DeleteObjectAsync(req);
         task.Wait();
