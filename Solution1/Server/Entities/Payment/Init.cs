@@ -11,7 +11,7 @@ public class Init
         OrderId = orderId;
         Recurrent = recurrent;
         CustomerKey = customerKey;
-        NotificationURL = resources.MineIP;
+        NotificationURL = resources.MineIP + "/tinkoffNotification";
     }
 
     public string TerminalKey { get; set; }

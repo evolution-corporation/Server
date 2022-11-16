@@ -24,7 +24,6 @@ public class PaymentService : IPaymentService
     private Payment payment;
     private Resources Resources;
 
-    //TODO: Сделать проверку платежа от Тинькоффа
     public PaymentService(DataContext context, TinkoffCredential credential, Resources resources)
     {
         this.context = context;
@@ -37,14 +36,14 @@ public class PaymentService : IPaymentService
         var user = context.GetUser(token);
         if (user == null)
             throw new NotSupportedException();
-        payment = new Payment(user.Id)
+        payment = new Payment(user.Id, type)
         {
             RecurrentPayment = recurrentPayment,
-            Amount = SubcribeTypeConverter(type)
+            Amount = SubscribeTypeConverter.GetSubscribePrice(type)
         };
         context.Payments.Add(payment);
         context.SaveChanges();
-        var result = InitPayment(user.Id, recurrentPayment, SubcribeTypeConverter(type), payment.Id);
+        var result = InitPayment(user.Id, recurrentPayment, payment.Amount, payment.Id);
         return result;
     }
 
@@ -63,16 +62,5 @@ public class PaymentService : IPaymentService
             throw new JsonException();
         paymentId = response.PaymentId;
         return response.PaymentURL;
-    }
-
-    private int SubcribeTypeConverter(SubscribeType type)
-    {
-        return type switch
-        {
-            SubscribeType.Week => 100,
-            SubscribeType.Month => 47900,
-            SubscribeType.Month6 => 199000,
-            _ => throw new NotImplementedException()
-        };
     }
 }
