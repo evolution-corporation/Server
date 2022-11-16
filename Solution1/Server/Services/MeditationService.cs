@@ -92,7 +92,8 @@ public class MeditationService : IMeditationService
         var max = query
             .Where(x => x.Language == language && x.TypeMeditation != TypeMeditation.Set)
             .Max(x => x.UserMeditations.Count);
-        return query.First(x => x.UserMeditations.Count == max && x.Language == language);
+        return query.First(x =>
+            x.UserMeditations.Count == max && x.Language == language && x.TypeMeditation != TypeMeditation.Set);
     }
 
     public void Create(CreateMeditationRequest model, string token)
@@ -134,9 +135,8 @@ public class MeditationService : IMeditationService
     //
     public void UserListened(string token, Guid meditationId)
     {
-        
         var user = context.GetUser(token);
-        var n = new UserMeditation(user.Id , meditationId, DateTime.Today);
+        var n = new UserMeditation(user.Id, meditationId, DateTime.Today);
         if (!context.UserMeditations.Contains(n))
             context.UserMeditations.Add(n);
         context.SaveChanges();

@@ -4,6 +4,7 @@ using Subscription;
 
 static StandardKernel ConfigureContainer()
 {
+    
     var container = new StandardKernel();
     container.Bind<Context>().To<Context>();
     var builder = new ConfigurationBuilder()

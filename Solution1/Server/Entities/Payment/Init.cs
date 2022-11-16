@@ -1,14 +1,17 @@
-﻿namespace Server.Entities.Payment;
+﻿using Server.Helpers;
+
+namespace Server.Entities.Payment;
 
 public class Init
 {
-    public Init(string terminalKey, int amount, string orderId, char recurrent, string customerKey)
+    public Init(string terminalKey, int amount, string orderId, char recurrent, string customerKey, Resources resources)
     {
         TerminalKey = terminalKey;
         Amount = amount;
         OrderId = orderId;
         Recurrent = recurrent;
         CustomerKey = customerKey;
+        NotificationURL = resources.MineIP;
     }
 
     public string TerminalKey { get; set; }
@@ -16,6 +19,8 @@ public class Init
     public string OrderId { get; set; }
     public char Recurrent { get; set; }
     public string CustomerKey { get; set; }
+    
+    public string NotificationURL { get; set; }
 }
 
 public class InitResponse

@@ -1,4 +1,6 @@
-﻿using System.Security.Cryptography;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using FirebaseAdmin.Auth;
@@ -20,12 +22,14 @@ public class PaymentService : IPaymentService
     private readonly TinkoffCredential credential;
     private int paymentId;
     private Payment payment;
+    private Resources Resources;
 
     //TODO: Сделать проверку платежа от Тинькоффа
-    public PaymentService(DataContext context, TinkoffCredential credential)
+    public PaymentService(DataContext context, TinkoffCredential credential, Resources resources)
     {
         this.context = context;
         this.credential = credential;
+        Resources = resources;
     }
 
     public string SubscribeUser(string token, bool recurrentPayment, SubscribeType type)
@@ -41,7 +45,6 @@ public class PaymentService : IPaymentService
         context.Payments.Add(payment);
         context.SaveChanges();
         var result = InitPayment(user.Id, recurrentPayment, SubcribeTypeConverter(type), payment.Id);
-        // Task.Run(() => CheckPaymentResult(guid, type));
         return result;
     }
 
@@ -49,8 +52,9 @@ public class PaymentService : IPaymentService
     {
         var client = new HttpClient();
         var message = new HttpRequestMessage(HttpMethod.Post, "https://securepay.tinkoff.ru/v2/Init");
-        var init = new Init(credential.TerminalKey, amount, orderId, recurrentPayment ? 'Y' : 'N', userId);
+        var init = new Init(credential.TerminalKey, amount, orderId, recurrentPayment ? 'Y' : 'N', userId, Resources);
         message.Content = new StringContent(JsonSerializer.Serialize(init));
+        message.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
         using var answer = client.Send(message);
         var task = answer.Content.ReadFromJsonAsync<InitResponse>();
         task.Wait();

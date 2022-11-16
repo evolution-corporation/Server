@@ -11,7 +11,7 @@ using Entities;
 
 public class DataContext : DbContext
 {
-    private readonly IConfiguration Configuration;
+    private readonly Resources resources;
     public DbSet<User> Users { get; set; }
     public DbSet<Meditation> Meditations { get; set; }
     public DbSet<Subscribe> Subscribes { get; set; }
@@ -20,15 +20,15 @@ public class DataContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Entities.Mediatation.Subscription> MeditationSubscriptions { get; set; }
 
-    public DataContext(IConfiguration configuration)
+    public DataContext(Resources resources)
     {
-        Configuration = configuration;
+        this.resources = resources;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         //options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
-        options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
+        options.UseNpgsql(resources.DbConnectionString);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -17,10 +17,11 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult SubscribeUser(string token, SubscribeType type, bool? needRecurrent)
+    public IActionResult SubscribeUser(SubscribeType type, bool? needRecurrent)
     {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
         var recurrent = needRecurrent ?? false;
-        return Ok(service.SubscribeUser(token, recurrent, type));
+        return Redirect(service.SubscribeUser(token, recurrent, type));
     }
     
 }

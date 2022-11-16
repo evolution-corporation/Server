@@ -8,4 +8,6 @@ public class Resources
     public string MeditationImages { get; set; }
     public string SubscriptionImages { get; set; }
     public string UserImage { get; set; }
+    public string MineIP { get; set; }
+    public string DbConnectionString { get; set; } 
 }

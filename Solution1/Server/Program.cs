@@ -6,16 +6,18 @@ using Server.Controllers;
 using Server.Helpers;
 using Server.Services;
 using Subscription;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using Newtonsoft.Json;
 using TinkoffCredential = Server.Helpers.TinkoffCredential;
 
 var builder = WebApplication.CreateBuilder(args);
-//builder.Environment.WebRootPath = Directory.GetCurrentDirectory() + "/..";
+//File.Copy("../settings/app_settings.json", "appsettings.json", true);
+var googleCredential = File.ReadAllText("../settings/firebase_key.json");
+var tinkoffCredential = File.ReadAllText("../settings/tinkoff_key.json");
+var resourcesSettings = File.ReadAllText("../settings/resources.json");
 var ip = "http://*:8000";
 // add services to DI container
 {
     var services = builder.Services;
-
     services.AddDbContext<DataContext>();
     services.AddCors();
     services.AddControllers().AddJsonOptions(x =>
@@ -29,6 +31,9 @@ var ip = "http://*:8000";
     });
     services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
     //var resourceSection = builder.Configuration.GetSection("Resources");
+    var resources = (Resources)JsonConvert.DeserializeObject(resourcesSettings,typeof(Resources))!;
+    //resources.DbConnectionString = connectionString;
+    //var resources = JsonConverter.Deserialize<Resources>(resourcesSettings)!;
     // var resources = new Resources
     // {
     //     Storage = resourceSection["Storage"],
@@ -38,13 +43,9 @@ var ip = "http://*:8000";
     //     MeditationImages = resourceSection["MeditationImages"],
     //     UserImage = resourceSection["UserImage"]
     // };
-
-    var resources = JsonSerializer.Deserialize<Resources>(Environment.GetEnvironmentVariable("Resources"));
-
     services.AddSingleton(_ => resources);
     //services.Configure<Resources>(builder.Configuration.GetSection("Resources"));
-    var credential =
-        JsonSerializer.Deserialize<TinkoffCredential>(Environment.GetEnvironmentVariable("TinkoffCredential"))!;
+    var credential = (TinkoffCredential)JsonConvert.DeserializeObject(tinkoffCredential, typeof(TinkoffCredential))!;
     if (credential == null)
         throw new ArgumentException("You forgot about Tinkoff credentials!");
     services.AddSingleton(_ => credential);
@@ -60,15 +61,15 @@ var ip = "http://*:8000";
     services.AddScoped<INotificationService, NotificationService>();
     services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
     services.AddScoped<IMeditationAudioService, MeditationAudioService>();
-    new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }).GetBucketVersioningAsync(
-        resources.ImageBucket);
-    services.AddSingleton(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
+    services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+    services.AddAWSService<IAmazonS3>();
+    // new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }).GetBucketVersioningAsync(
+    //     resources.ImageBucket);
+    //services.AddSingleton(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {
-        Credential = GoogleCredential.FromJson(Environment.GetEnvironmentVariable("GoogleCredential")),
-        //Credential =
-          //  GoogleCredential.FromJson(Environment.GetEnvironmentVariable("GoogleCredential")),
+        Credential = GoogleCredential.FromJson(googleCredential),
         ProjectId = "plants-336217",
     });
 }
