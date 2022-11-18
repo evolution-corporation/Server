@@ -62,10 +62,10 @@ var ip = "http://*:8000";
     services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
     services.AddScoped<IMeditationAudioService, MeditationAudioService>();
     services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
-    services.AddAWSService<IAmazonS3>();
+    //services.AddAWSService<IAmazonS3>();
     // new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }).GetBucketVersioningAsync(
     //     resources.ImageBucket);
-    //services.AddSingleton(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
+    services.AddSingleton(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {
