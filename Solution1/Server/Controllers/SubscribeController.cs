@@ -14,10 +14,10 @@ public class SubscribeController: ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public IActionResult GetSubscribe()
+    [HttpGet("{needLongPool:bool}")]
+    public IActionResult GetSubscribe(bool needLongPool)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
-        return Ok(_service.GetUserSubscribe(token));
+        return Ok(_service.GetUserSubscribe(token, needLongPool));
     }
 }

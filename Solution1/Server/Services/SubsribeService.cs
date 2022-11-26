@@ -8,7 +8,7 @@ namespace Server.Services;
 
 public interface ISubscribeService
 {
-   public Subscribe? GetUserSubscribe(string token);
+   public Subscribe? GetUserSubscribe(string token, bool needLongPool);
    public Subscribe GetUserSubscribeByAdmin(string userId, string token);
 }
 
@@ -21,14 +21,16 @@ public class SubscribeService: ISubscribeService
       this.context = context;
    }
 
-   public Subscribe? GetUserSubscribe(string token)
+   public Subscribe? GetUserSubscribe(string token, bool needLongPool)
    {
       var user = context.GetUser(token);
       if (user == null)
          throw new NotSupportedException();
       var start = DateTime.Now;
       var subscribe = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == user.Id);
-      while (subscribe != null || DateTime.Now - start < new TimeSpan(0, 0, 10, 0))
+      if (!needLongPool)
+         return subscribe;
+      while (subscribe != null && DateTime.Now - start < new TimeSpan(0, 0, 10, 0))
       {
          Thread.Sleep(60 * 1000);
          subscribe = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == user.Id);
