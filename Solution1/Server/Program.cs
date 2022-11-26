@@ -7,6 +7,7 @@ using Server.Helpers;
 using Server.Services;
 using Subscription;
 using Newtonsoft.Json;
+using Resources = Server.Helpers.Resources;
 using TinkoffCredential = Server.Helpers.TinkoffCredential;
 
 var builder = WebApplication.CreateBuilder(args);

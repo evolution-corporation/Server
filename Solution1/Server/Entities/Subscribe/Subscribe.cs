@@ -20,6 +20,6 @@ public class Subscribe
     public DateTime WhenSubscribe { get; set; } = DateTime.Today;
     public int RemainingTime { get; set; }
     public SubscribeType Type { get; set; }
-    public int RebillId { get; set; } = -1;
+    public long RebillId { get; set; } = -1;
     
 }

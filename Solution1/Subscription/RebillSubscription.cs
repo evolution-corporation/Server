@@ -34,20 +34,6 @@ public class RebillSubscription
         }
         return false;
     }
-    
-    static StandardKernel ConfigureContainer()
-    {
-        var container = new StandardKernel();
-        container.Bind<Context>().To<Context>();
-        var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false);
-        IConfiguration configuration = builder.Build();
-        container.Bind<IConfiguration>().ToConstant(configuration);
-        var str = File.ReadAllText(configuration.GetSection("TinkoffCredential").Value);
-        var credential = (TinkoffCredential)JsonSerializer.Deserialize(str, typeof(TinkoffCredential))!;
-        container.Bind<TinkoffCredential>().ToConstant(credential);
-        return container;
-    }
 
     static InitResponse InitPayment(TinkoffCredential credential, string userId, bool recurrentPayment, int amount,
         string orderId, HttpClient client)

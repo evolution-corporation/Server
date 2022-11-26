@@ -64,7 +64,7 @@ public class UserService : IUserService
             model.DisplayName != null && ContentFilter.ContainsAbsentWord(model.DisplayName.Split()))
             throw new AppException("Here is bad word");
         var user = mapper.Map<User>(model);
-        
+
         user.Id = Id;
 
         if (model.Image != null)
@@ -94,15 +94,15 @@ public class UserService : IUserService
 
     public User UpdateByUser(string token, UpdateUserRequest model)
     {
-        var query = context.Users.AsQueryable();
-        var uid = FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token).Result.Uid;
-        var user = query.First(x => x.Id == uid);
+        var user = context.GetUser(token);
         if (user == null)
             throw new AppException("User with token" + token + "not found");
         if (model.NickName != null)
             if (context.Users.Any(x => x.NickName == model.NickName))
                 throw new AppException($"{model.NickName} already taken. You can try to use another nickname"
                                        + string.Join(", ", GenerateUserNickname(model.NickName)));
+        mapper.Map(model, user);
+        //context.Users.Update(user);
         if (model.Image != null)
         {
             if (user.PhotoId != null) DeleteObject((Guid)user.PhotoId);
@@ -112,8 +112,6 @@ public class UserService : IUserService
             user.PhotoId = photoId;
             Console.WriteLine("Photo changed");
         }
-        mapper.Map(model, user);
-        context.Users.Update(user);
         context.SaveChanges();
         return user;
     }

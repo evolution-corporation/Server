@@ -11,14 +11,10 @@ public class CheckSubscription
     {
         var container = new StandardKernel();
         container.Bind<Context>().To<Context>();
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false);
-        IConfiguration configuration = builder.Build();
-        container.Bind<IConfiguration>().ToConstant(configuration);
-        var credential = (TinkoffCredential)JsonSerializer.Deserialize(
-            configuration.GetSection("TinkoffCredential").Value, typeof(TinkoffCredential))!;
+        var credential = (TinkoffCredential)JsonSerializer.Deserialize(File.ReadAllText("../settings/tinkoff_key.json"), typeof(TinkoffCredential))!; 
         container.Bind<TinkoffCredential>().ToConstant(credential);
+        var resources = (Resources)JsonSerializer.Deserialize(File.ReadAllText("../settings/resources.json"),typeof(Resources))!;
+        container.Bind<Resources>().ToConstant(resources);
         return container;
     }
 

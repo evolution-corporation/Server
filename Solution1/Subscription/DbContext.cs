@@ -8,18 +8,18 @@ namespace Subscription;
 
 public sealed class Context : DbContext
 {
-    private readonly IConfiguration configuration;
+    private readonly Resources resources;
     public DbSet<Subscribe> Subscribes { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Payment> Payments;
 
-    public Context(IConfiguration configuration)
+    public Context(Resources resources)
     {
-        this.configuration = configuration;
+        this.resources = resources;
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        optionsBuilder.UseNpgsql(configuration.GetConnectionString("WebApiDatabase"));
-    }
+       options.UseNpgsql(resources.DbConnectionString);
+      }
 }

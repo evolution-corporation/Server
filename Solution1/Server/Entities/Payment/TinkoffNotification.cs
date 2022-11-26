@@ -9,7 +9,7 @@ public class TinkoffNotification
     public int PaymentId { get; set; }
     public string ErrorCode { get; set; }
     public int Amount { get; set; }
-    public int RebillId { get; set; }
+    public long RebillId { get; set; }
     public string Pan { get; set; }
     public string ExpDate { get; set; }
     public string Token { get; set; }
