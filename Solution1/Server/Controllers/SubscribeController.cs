@@ -4,6 +4,7 @@ using Server.Services;
 namespace Server.Controllers;
 
 [ApiController]
+[Route("/subscribe")]
 public class SubscribeController: ControllerBase
 {
     private readonly ISubscribeService _service;
