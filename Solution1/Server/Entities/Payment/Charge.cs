@@ -21,13 +21,13 @@ public class Charge
     public string Token { get; set; }
 }
 
-public class ChargeResponse
-{
-    public string TerminalKey { get; set; }
-    public int Amount { get; set; }
-    public string OrderId { get; set; }
-    public bool Success { get; set; }
-    public string Status { get; set; }
-    public int PaymentId { get; set; }
-    public string ErrorCode { get; set; }
-}
+// public class ChargeResponse
+// {
+//     public string TerminalKey { get; set; }
+//     public int Amount { get; set; }
+//     public string OrderId { get; set; }
+//     public bool Success { get; set; }
+//     public string Status { get; set; }
+//     public int PaymentId { get; set; }
+//     public string ErrorCode { get; set; }
+// }

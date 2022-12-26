@@ -6,7 +6,7 @@ public class TinkoffNotification
     public string OrderId { get; set; }
     public bool Success { get; set; }
     public string Status { get; set; }
-    public int PaymentId { get; set; }
+    public long PaymentId { get; set; }
     public string ErrorCode { get; set; }
     public int Amount { get; set; }
     public long RebillId { get; set; }

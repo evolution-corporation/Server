@@ -25,11 +25,11 @@ public class Init
 
 public class InitResponse
 {
-    public string TerminalKey { get; set; }
-    public int Amount { get; set; }
-    public string OrderId { get; set; }
-    public bool Success { get; set; }
-    public int PaymentId { get; set; }
-    public string ErrorCode { get; set; }
+    // public string TerminalKey { get; set; }
+    // public int Amount { get; set; }
+    // public string OrderId { get; set; }
+    // public bool Success { get; set; }
+    public long PaymentId { get; set; }
+    //public string ErrorCode { get; set; }
     public string PaymentURL { get; set; }
 }

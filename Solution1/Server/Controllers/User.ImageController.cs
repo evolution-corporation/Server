@@ -23,6 +23,14 @@ public class UserImage: ControllerBase
             throw new AuthenticationException("Попытка получить фотографию пользователя без токена");
         return Ok(_service.GetUserImage(id));
     }
+
+    [HttpDelete]
+    public IActionResult DeleteUserImage()
+    {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
+        _service.DeleteUserImage(token);
+        return Ok();
+    }
 }
 
 

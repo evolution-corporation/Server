@@ -13,14 +13,13 @@ namespace Server.Services;
 
 public interface IPaymentService
 {
-    public string SubscribeUser(string token, bool recurrentPayment, SubscribeType type);
+    public string? SubscribeUser(string token, bool recurrentPayment, SubscribeType type);
 }
 
 public class PaymentService : IPaymentService
 {
     private readonly DataContext context;
     private readonly TinkoffCredential credential;
-    private int paymentId;
     private Payment payment;
     private Resources Resources;
 
@@ -31,11 +30,14 @@ public class PaymentService : IPaymentService
         Resources = resources;
     }
 
-    public string SubscribeUser(string token, bool recurrentPayment, SubscribeType type)
+    public string? SubscribeUser(string token, bool recurrentPayment, SubscribeType type)
     {
         var user = context.GetUser(token);
         if (user == null)
             throw new NotSupportedException();
+        var sub = context.Subscribes.FirstOrDefault(x => x.UserId == user.Id);
+        if (sub != null && type == SubscribeType.Week)
+            return null;
         payment = new Payment(user.Id, type)
         {
             RecurrentPayment = recurrentPayment,
@@ -60,7 +62,6 @@ public class PaymentService : IPaymentService
         var response = task.Result;
         if (response == null)
             throw new JsonException();
-        paymentId = response.PaymentId;
         return response.PaymentURL;
     }
 }

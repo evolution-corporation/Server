@@ -1,18 +1,18 @@
 {
   "version": 2,
-  "dgSpecHash": "wlg2SCQK/CpqWiWeyn9tvwA8Whx1YuEWPiuuZQc0bYnuDdxQWVkIUwhhAUTxprCTEAS04ALASOy1JJfzI+ltaw==",
+  "dgSpecHash": "BrV3MjwKwUqNspp980SKQN0EpIWJHosR9hUe6uRQsBhHrOnxoyiMi19G0v6qfqURyE8jBCPlCeP9euC1vGGC2g==",
   "success": true,
-  "projectFilePath": "C:\\Users\\permm\\RiderProjects\\Server\\Solution1\\Hello World\\Hello World.csproj",
+  "projectFilePath": "E:\\work_projects\\Server\\Solution1\\Hello World\\Hello World.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\permm\\.nuget\\packages\\firebaseadmin\\2.3.0\\firebaseadmin.2.3.0.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\google.api.gax\\3.2.0\\google.api.gax.3.2.0.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\google.api.gax.rest\\3.2.0\\google.api.gax.rest.3.2.0.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\google.apis\\1.49.0\\google.apis.1.49.0.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\google.apis.auth\\1.49.0\\google.apis.auth.1.49.0.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\google.apis.core\\1.49.0\\google.apis.core.1.49.0.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.0.0\\microsoft.bcl.asyncinterfaces.1.0.0.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
-    "C:\\Users\\permm\\.nuget\\packages\\system.collections.immutable\\1.7.1\\system.collections.immutable.1.7.1.nupkg.sha512"
+    "C:\\Users\\Administrator\\.nuget\\packages\\firebaseadmin\\2.3.0\\firebaseadmin.2.3.0.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\google.api.gax\\3.2.0\\google.api.gax.3.2.0.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\google.api.gax.rest\\3.2.0\\google.api.gax.rest.3.2.0.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\google.apis\\1.49.0\\google.apis.1.49.0.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\google.apis.auth\\1.49.0\\google.apis.auth.1.49.0.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\google.apis.core\\1.49.0\\google.apis.core.1.49.0.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.0.0\\microsoft.bcl.asyncinterfaces.1.0.0.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\system.collections.immutable\\1.7.1\\system.collections.immutable.1.7.1.nupkg.sha512"
   ],
   "logs": []
 }

@@ -10,6 +10,7 @@ public interface ISubscribeService
 {
    public Subscribe? GetUserSubscribe(string token, bool needLongPool);
    public Subscribe GetUserSubscribeByAdmin(string userId, string token);
+   public void DeleteUserSubscribe(string token);
 }
 
 public class SubscribeService: ISubscribeService
@@ -30,9 +31,9 @@ public class SubscribeService: ISubscribeService
       var subscribe = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == user.Id);
       if (!needLongPool)
          return subscribe;
-      while (subscribe != null && DateTime.Now - start < new TimeSpan(0, 0, 10, 0))
+      while (subscribe != null && DateTime.Now - start < new TimeSpan(0, 0, 1, 0))
       {
-         Thread.Sleep(60 * 1000);
+         Thread.Sleep(15 * 1000);
          subscribe = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == user.Id);
       }
 
@@ -49,5 +50,13 @@ public class SubscribeService: ISubscribeService
          throw new AuthenticationException("You don't have permission");
       }
       return context.Subscribes.AsQueryable().First(x => x.UserId == userId);
+   }
+
+   public void DeleteUserSubscribe(string token)
+   {
+      var user = context.GetUser(token);
+      var subscribe = context.Subscribes.AsQueryable().First(x => user != null && x.UserId == user.Id);
+      subscribe.RebillId = -1;
+      context.SaveChanges();
    }
 }

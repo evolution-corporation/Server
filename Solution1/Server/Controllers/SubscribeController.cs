@@ -20,4 +20,11 @@ public class SubscribeController: ControllerBase
         var token = HttpContext.Request.Headers.Authorization.ToString();
         return Ok(_service.GetUserSubscribe(token, needLongPool));
     }
+
+    [HttpDelete]
+    public IActionResult DeleteSubscribe()
+    {
+        _service.DeleteUserSubscribe(HttpContext.Request.Headers.Authorization.ToString());
+        return Ok();
+    }
 }
