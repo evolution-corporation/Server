@@ -25,8 +25,8 @@ public static class SubscribeTypeConverter
         return type switch
         {
             SubscribeType.Week => 100,
-            SubscribeType.Month => 47900,
-            SubscribeType.Month6 => 199000,
+            SubscribeType.Month => 29900,
+            SubscribeType.Month6 => 124900,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

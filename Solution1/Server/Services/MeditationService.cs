@@ -22,7 +22,7 @@ public interface IMeditationService
     //public void Update(UpdateMeditationRequest model, Guid id, string token);
 
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences);
-    public void UserListened(string token, Guid meditationId);
+    public void UserListened(string token, Guid meditationId, string meditationLanguage);
 }
 
 public class MeditationService : IMeditationService
@@ -50,7 +50,14 @@ public class MeditationService : IMeditationService
         var subscription = context.MeditationSubscriptions.AsQueryable().FirstOrDefault(x => x.Id == id);
         if (meditation.IsSubscribed && sub)
             throw new ArgumentException("User did not have subscription");
-        return new { Meditation = meditation, Subscription = subscription };
+        var obj = new
+        {
+            MeditatiodId = subscription, 
+            Title = subscription.Headers,
+            subscription.Description,
+            Body = subscription.PayloadText.Split("~")
+        };
+        return new { Meditation = meditation, Subscription = obj };
     }
 
     public Meditation[] GetMeditationByPreferences(MeditationPreferences preferences)
@@ -133,10 +140,10 @@ public class MeditationService : IMeditationService
     //     context.SaveChangesAsync();
     // }
     //
-    public void UserListened(string token, Guid meditationId)
+    public void UserListened(string token, Guid meditationId, string meditationLanguage)
     {
         var user = context.GetUser(token);
-        var n = new UserMeditation(user.Id, meditationId, DateTime.Today);
+        var n = new UserMeditation(user.Id, meditationId, DateTime.Today, meditationLanguage);
         if (!context.UserMeditations.Contains(n))
             context.UserMeditations.Add(n);
         context.SaveChanges();

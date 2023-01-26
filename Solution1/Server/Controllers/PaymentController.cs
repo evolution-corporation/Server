@@ -23,5 +23,4 @@ public class PaymentController : ControllerBase
         var recurrent = needRecurrent ?? false;
         return Redirect(service.SubscribeUser(token, recurrent, type));
     }
-    
 }

@@ -35,13 +35,12 @@ public class PaymentService : IPaymentService
         var user = context.GetUser(token);
         if (user == null)
             throw new NotSupportedException();
-        var sub = context.Subscribes.FirstOrDefault(x => x.UserId == user.Id);
+        var sub = context.Subscribes.AsQueryable().FirstOrDefault(x => x.UserId == user.Id);
         if (sub != null && type == SubscribeType.Week)
             return null;
         payment = new Payment(user.Id, type)
         {
-            RecurrentPayment = recurrentPayment,
-            Amount = SubscribeTypeConverter.GetSubscribePrice(type)
+            RecurrentPayment = recurrentPayment
         };
         context.Payments.Add(payment);
         context.SaveChanges();

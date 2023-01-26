@@ -48,13 +48,13 @@ public class UserImageService : IUserImageService
     
     private void DeleteObject(User user)
     {
-        var req = new DeleteObjectRequest
-        {
-            BucketName = resources.ImageBucket,
-            Key = resources.UserImage + user.PhotoId
-        };
-
-        Task<DeleteObjectResponse> res = s3.DeleteObjectAsync(req);
-        res.Wait();
+    //     var req = new DeleteObjectRequest
+    //     {
+    //         BucketName = resources.ImageBucket,
+    //         Key = resources.UserImage + user.PhotoId
+    //     };
+    //     Task<DeleteObjectResponse> res = s3.DeleteObjectAsync(req);
+    //     res.Wait();
+        s3.DeleteObjectAsync(resources.ImageBucket, resources.UserImage + user.PhotoId);
     }
 }

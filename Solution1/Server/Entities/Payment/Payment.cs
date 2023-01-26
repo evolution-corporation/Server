@@ -9,6 +9,7 @@ public class Payment
     {
         UserId = userId;
         SubscribeType = type;
+        Amount = SubscribeTypeConverter.GetSubscribePrice(type);
     }
     
     public string Id { get; set; } = Guid.NewGuid().ToString();

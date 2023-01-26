@@ -32,7 +32,7 @@ var ip = "http://*:8000";
     });
     services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
     //var resourceSection = builder.Configuration.GetSection("Resources");
-    var resources = (Resources)JsonConvert.DeserializeObject(resourcesSettings,typeof(Resources))!;
+    var resources = (Resources)JsonConvert.DeserializeObject(resourcesSettings, typeof(Resources))!;
     //resources.DbConnectionString = connectionString;
     //var resources = JsonConverter.Deserialize<Resources>(resourcesSettings)!;
     // var resources = new Resources
@@ -62,11 +62,13 @@ var ip = "http://*:8000";
     services.AddScoped<INotificationService, NotificationService>();
     services.AddScoped<ITinkoffNotificationService, TinkoffNotificationService>();
     services.AddScoped<IMeditationAudioService, MeditationAudioService>();
+    services.AddScoped(typeof(WebServicesController));
     services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
     //services.AddAWSService<IAmazonS3>();
-    // new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }).GetBucketVersioningAsync(
-    //     resources.ImageBucket);
-    services.AddSingleton(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
+    new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }).GetBucketVersioningAsync(
+        resources.ImageBucket);
+    services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
+    services.AddSingleton<AmazonS3Client>(_ => new AmazonS3Client(new AmazonS3Config { ServiceURL = "https://s3.yandexcloud.net" }));
     services.AddSignalR();
     FirebaseApp.Create(new AppOptions
     {
@@ -90,6 +92,13 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     app.MapControllers();
 }
 
+
 new Task(() => new CheckSubscription().Run()).Start();
 new Task(NicknameService.Run).Start();
+
+new Task(() =>
+{
+    Thread.Sleep(1000 * 60 * 60);
+    ((WebServicesController)app.Services.GetService(typeof(WebServicesController))!).ShutdownSite();
+}).Start();
 app.Run(ip);

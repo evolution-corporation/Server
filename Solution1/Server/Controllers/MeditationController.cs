@@ -51,11 +51,10 @@ public class MeditationController : ControllerBase
     }
     
     [HttpPut]
-    public IActionResult AddMeditation(Guid meditationId)
+    public IActionResult AddMeditation(Guid meditationId, string meditationLanguage)
     {
         var token = HttpContext.Request.Headers.Authorization.ToString();
-        
-        service.UserListened(token, meditationId);
+        service.UserListened(token, meditationId, meditationLanguage);
         return Ok();
     }
 
